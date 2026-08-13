@@ -100,12 +100,12 @@ const RESOURCES: Resource[] = [
   {
     id: "wow-video",
     index: "02",
-    title: "WOW Video",
+    title: "WOW Student",
     meta: "Department introduction for new students",
     description:
       "A short video introduction to help new incoming students get to know the IT department and how we support campus.",
     note: "For incoming students",
-    video: "/wow.mp4",
+    video: "/unikl-wow.mp4",
   },
   {
     id: "mic-guidelines",
