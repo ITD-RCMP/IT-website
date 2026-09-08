@@ -1,33 +1,28 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-
-const ACCENT = "#171717";
+import Tilt from "react-parallax-tilt";
 
 const FOCUS = [
   {
     key: "av",
-    index: "01",
     title: "Audio & Visual",
     description:
       "Meeting rooms, displays, projectors and presentation setups kept ready for teaching and events.",
   },
   {
     key: "network",
-    index: "02",
     title: "Network",
     description:
       "Wi‑Fi and LAN support with practical troubleshooting so campus stays connected.",
   },
   {
     key: "system-dev",
-    index: "03",
     title: "System Development",
     description:
       "Internal systems and tools built to improve the efficiency of university services.",
   },
   {
     key: "helpdesk",
-    index: "04",
     title: "Helpdesk",
     description:
       "Day-to-day support for staff and students when technology gets in the way.",
@@ -35,149 +30,162 @@ const FOCUS = [
 ] as const;
 
 export default function AboutUs() {
-  const [active, setActive] = React.useState<(typeof FOCUS)[number]["key"]>(FOCUS[0].key);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [tilted, setTilted] = React.useState<(typeof FOCUS)[number]["key"] | null>(null);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#F2F2F2] text-neutral-900">
-      <div className="relative mx-auto flex w-full max-w-5xl flex-col px-5 py-5 sm:px-8 sm:py-6 lg:px-10 lg:py-8">
-        <div className="pt-1">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1 py-1 text-sm font-medium text-neutral-500 transition hover:text-neutral-900"
-          >
-            ‹ Back
+    <>
+      <main className="relative min-h-screen bg-white text-neutral-900">
+        <header className="relative z-20 mx-auto flex max-w-5xl items-center justify-between px-6 pt-6">
+          <Link to="/" aria-label="Home">
+            <img
+              src="/unikl-official.png"
+              alt="UniKL Logo"
+              className="h-8 w-auto object-contain md:h-10"
+            />
           </Link>
-        </div>
 
-        <section className="border-b border-neutral-300/70 pb-10 pt-10 sm:pb-14 sm:pt-14 animate-[aboutIn_0.7s_ease-out_both]">
-          <div className="grid gap-6 sm:grid-cols-[1.2fr_0.8fr] sm:items-start sm:gap-10">
-            <h1 className="text-[1.85rem] font-semibold leading-[1.15] tracking-tight text-neutral-950 sm:text-4xl lg:text-[2.75rem]">
-              Support is what people feel.
-              <br />
-              Systems are what keep campus running.
-            </h1>
-            <p className="max-w-xs text-sm leading-6 text-neutral-500 sm:ml-auto sm:text-right sm:text-[15px] sm:leading-7">
-              Information Technology Department — UniKL Royal College of Medicine Perak. We shape both: day-to-day help and the infrastructure behind it.
-            </p>
+          <nav className="hidden items-center gap-7 text-sm font-medium text-neutral-700 md:flex">
+            <Link to="/information" className="hover:text-neutral-900">Info</Link>
+            <Link to="/about" className="text-neutral-900">About us</Link>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((v) => !v)}
+              className="inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-900 hover:bg-neutral-50 md:hidden"
+              aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              Menu
+            </button>
+            <a href="http://rush.rcmp.edu.my" className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white hover:bg-neutral-800">
+              Get help
+            </a>
           </div>
-        </section>
+        </header>
 
-        <section className="relative py-2">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-px -translate-x-1/2 sm:block"
-            style={{ backgroundColor: ACCENT }}
-          />
+        {mobileMenuOpen ? (
+          <div className="relative z-20 mx-auto max-w-5xl px-6 pt-3 md:hidden">
+            <div className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
+              <Link
+                to="/information"
+                className="block rounded-xl px-3 py-2 text-sm font-semibold text-neutral-900 hover:bg-neutral-50"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Information
+              </Link>
+              <Link
+                to="/about"
+                className="block rounded-xl px-3 py-2 text-sm font-semibold text-neutral-900 hover:bg-neutral-50"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About us
+              </Link>
+            </div>
+          </div>
+        ) : null}
 
-          <ul className="flex flex-col">
-            {FOCUS.map((item, i) => {
-              const open = active === item.key;
+        <div className="mx-auto w-full max-w-5xl px-6 pb-10 pt-16 sm:pt-20">
+          <p className="mb-4 font-heading text-sm font-semibold tracking-wide text-neutral-500">
+            Information Technology Department — UniKL Royal College of Medicine Perak
+          </p>
+          <h1 className="max-w-3xl font-heading text-4xl font-bold leading-[1.05] tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+            Support is what people feel.
+            <br />
+            Systems are what keep campus running.
+          </h1>
+          <p className="mt-6 max-w-xl text-lg leading-7 text-neutral-600">
+            We shape both: day-to-day help and the infrastructure behind it.
+          </p>
+
+          <section className="mt-16 grid gap-4 sm:grid-cols-2">
+            {FOCUS.map((item) => {
+              const active = tilted === item.key;
               return (
-                <li
+                <Tilt
                   key={item.key}
-                  className="border-b border-neutral-300/70 animate-[aboutIn_0.65s_ease-out_both]"
-                  style={{ animationDelay: `${0.15 + i * 0.07}s` }}
+                  tiltEnable={active}
+                  tiltMaxAngleX={10}
+                  tiltMaxAngleY={10}
+                  perspective={900}
+                  transitionSpeed={600}
+                  scale={active ? 1.03 : 1}
+                  glareEnable={false}
+                  gyroscope={false}
+                  className="h-full"
                 >
-                  <button
-                    type="button"
-                    onClick={() => setActive(item.key)}
-                    onMouseEnter={() => setActive(item.key)}
-                    aria-pressed={open}
-                    className="group grid w-full grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 py-6 text-left sm:grid-cols-[1fr_auto_1fr] sm:gap-x-0 sm:py-7"
-                  >
-                    <span
-                      className={[
-                        "order-2 text-lg font-semibold tracking-tight transition-colors duration-200 sm:order-1 sm:pr-8 sm:text-right sm:text-xl",
-                        open ? "text-neutral-950" : "text-neutral-400",
-                      ].join(" ")}
-                    >
-                      {item.title}
-                    </span>
-
-                    <span
-                      className="order-1 flex h-8 w-8 shrink-0 items-center justify-center font-mono text-[11px] font-semibold tabular-nums transition-colors duration-200 sm:order-2 sm:relative sm:z-10"
-                      style={
-                        open
-                          ? { backgroundColor: ACCENT, color: "#fff" }
-                          : { backgroundColor: "#F2F2F2", color: ACCENT, border: `1px solid ${ACCENT}` }
+                  <article
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={active}
+                    onClick={() => setTilted(active ? null : item.key)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setTilted(active ? null : item.key);
                       }
-                    >
-                      {item.index}
-                    </span>
-
-                    <span
-                      className={[
-                        "order-3 col-span-2 max-w-md text-sm leading-6 transition-colors duration-200 sm:col-span-1 sm:pl-8 sm:text-[15px] sm:leading-7",
-                        open ? "text-neutral-600" : "text-neutral-400",
-                      ].join(" ")}
-                    >
+                    }}
+                    className={`h-full cursor-pointer rounded-[22px] border bg-white p-6 text-left shadow-[0_8px_24px_rgba(0,0,0,0.04)] ${
+                      active ? "border-neutral-900" : "border-neutral-200"
+                    }`}
+                  >
+                    <h2 className="font-heading text-xl font-bold tracking-tight text-neutral-900">
+                      {item.title}
+                    </h2>
+                    <p className="mt-3 text-sm leading-6 text-neutral-600 sm:text-[15px] sm:leading-7">
                       {item.description}
-                    </span>
-                  </button>
-                </li>
+                    </p>
+                  </article>
+                </Tilt>
               );
             })}
-          </ul>
-        </section>
+          </section>
 
-        <section className="relative py-12 sm:py-16 animate-[aboutIn_0.7s_ease-out_0.45s_both]">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-px -translate-x-1/2 sm:block"
-            style={{ backgroundColor: ACCENT }}
-          />
-
-          <div className="grid gap-10 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-0">
-            <div className="sm:pr-10 sm:text-right">
-              <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">
+          <section className="mt-16 grid gap-10 border-t border-neutral-200 pt-12 sm:grid-cols-2 sm:gap-16">
+            <div>
+              <h2 className="font-heading text-2xl font-bold tracking-tight text-neutral-900">
                 Support
-              </p>
-              <p className="text-sm leading-6 text-neutral-600 sm:text-[15px] sm:leading-7">
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-neutral-600 sm:text-[15px] sm:leading-7">
                 AV, network and helpdesk that keep teaching, events and daily campus work clear and usable.
               </p>
             </div>
-
-            <div
-              aria-hidden="true"
-              className="relative z-10 mx-auto hidden h-7 w-7 items-center justify-center bg-[#F2F2F2] font-mono text-[10px] text-neutral-500 sm:flex"
-              style={{ color: ACCENT }}
-            >
-              [■]
-            </div>
-
-            <div className="sm:pl-10">
-              <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">
+            <div>
+              <h2 className="font-heading text-2xl font-bold tracking-tight text-neutral-900">
                 Systems
-              </p>
-              <p className="text-sm leading-6 text-neutral-600 sm:text-[15px] sm:leading-7">
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-neutral-600 sm:text-[15px] sm:leading-7">
                 Architecture, tools and internal development that keep services stable, efficient and ready to grow.
               </p>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <footer className="border-t border-neutral-300/70 pb-6 pt-8">
-          <p className="text-right text-xs font-medium text-neutral-400">
-            © 2026 Information Technology Department RCMP
-            <span className="mx-2 text-neutral-300" aria-hidden="true">
-              ·
-            </span>
-            <Link
-              to="/login"
-              className="text-neutral-300 transition hover:text-neutral-500"
-            >
-              Staff
-            </Link>
-          </p>
-        </footer>
-      </div>
+          <footer className="mt-16 border-t border-neutral-200 pb-8 pt-8">
+            <p className="text-right text-xs font-medium text-neutral-400">
+              © 2026 Information Technology Department RCMP
+              <span className="mx-2 text-neutral-300" aria-hidden="true">
+                ·
+              </span>
+              <Link
+                to="/login"
+                className="text-neutral-300 transition hover:text-neutral-500"
+              >
+                Staff
+              </Link>
+            </p>
+          </footer>
+        </div>
+      </main>
 
-      <style>{`
-        @keyframes aboutIn {
-          from { opacity: 0; transform: translateY(14px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </main>
+      <Link
+        to="/feedback"
+        className="fixed right-0 top-1/2 z-50 flex -translate-y-1/2 items-center rounded-l-md bg-[#0077C8] px-2.5 py-4 text-sm font-semibold text-white shadow-md transition hover:bg-[#0066AD]"
+        aria-label="Send Feedback"
+      >
+        <span className="rotate-180 [writing-mode:vertical-rl]">Send Feedback</span>
+      </Link>
+    </>
   );
 }

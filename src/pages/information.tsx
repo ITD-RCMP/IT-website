@@ -120,205 +120,222 @@ const RESOURCES: Resource[] = [
 ];
 
 export default function Information() {
-  const [activeId, setActiveId] = React.useState<string | null>(null);
-  const active = RESOURCES.find((r) => r.id === activeId) ?? null;
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [activeId, setActiveId] = React.useState(RESOURCES[0].id);
+  const [stepIndex, setStepIndex] = React.useState(0);
+  const active = RESOURCES.find((r) => r.id === activeId) ?? RESOURCES[0];
+  const openStep = active.steps?.[stepIndex];
+
+  React.useEffect(() => {
+    const id = window.location.hash.replace("#", "");
+    if (!RESOURCES.some((r) => r.id === id)) return;
+    setActiveId(id);
+    setStepIndex(0);
+  }, []);
+
+  const selectResource = (id: string) => {
+    setActiveId(id);
+    setStepIndex(0);
+    window.history.replaceState(null, "", `#${id}`);
+  };
 
   return (
-    <main className="relative min-h-screen bg-[#F2F2F2] text-neutral-900">
-      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-5 sm:px-8 sm:py-6 lg:px-10 lg:py-8">
-        <div className="pt-1">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1 py-1 text-sm font-medium text-neutral-500 transition hover:text-neutral-900"
-          >
-            ‹ Back
+    <>
+      <main className="relative min-h-screen bg-white text-neutral-900">
+        <header className="relative z-20 mx-auto flex max-w-5xl items-center justify-between px-6 pt-6">
+          <Link to="/" aria-label="Home">
+            <img
+              src="/unikl-official.png"
+              alt="UniKL Logo"
+              className="h-8 w-auto object-contain md:h-10"
+            />
           </Link>
-        </div>
 
-        <header className="max-w-2xl pb-10 pt-10 sm:pb-12 sm:pt-12 animate-[infoIn_0.7s_ease-out_both]">
-          <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-            Information Technology Department
-          </p>
-          <h1 className="text-[1.85rem] font-semibold leading-[1.15] tracking-tight text-neutral-950 sm:text-4xl lg:text-[2.75rem]">
-            Resources & guides
-          </h1>
-          <p className="mt-4 max-w-md text-sm leading-6 text-neutral-500 sm:text-[15px] sm:leading-7">
-            Choose a resource from the list to view the full guideline or media.
-          </p>
+          <nav className="hidden items-center gap-7 text-sm font-medium text-neutral-700 md:flex">
+            <Link to="/information" className="text-neutral-900">Info</Link>
+            <Link to="/about" className="hover:text-neutral-900">About us</Link>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((v) => !v)}
+              className="inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-900 hover:bg-neutral-50 md:hidden"
+              aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              Menu
+            </button>
+            <a href="http://rush.rcmp.edu.my" className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white hover:bg-neutral-800">
+              Get help
+            </a>
+          </div>
         </header>
 
-        <div className="grid flex-1 gap-10 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-14 xl:grid-cols-[14rem_minmax(0,1fr)]">
-          <aside className="lg:sticky lg:top-8 lg:self-start animate-[infoIn_0.65s_ease-out_0.1s_both]">
-            <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">
-              Contents
-            </p>
-            <nav
-              aria-label="Resource contents"
-              className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-0 lg:overflow-visible lg:pb-0"
-            >
-              {RESOURCES.map((item) => {
-                const selected = activeId === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setActiveId(item.id)}
-                    aria-pressed={selected}
-                    aria-controls="resource-panel"
-                    className={[
-                      "flex shrink-0 items-baseline gap-3 border-b-2 px-1 py-2 text-left transition-colors lg:border-b-0 lg:border-l-2 lg:px-3 lg:py-2.5",
-                      selected
-                        ? "border-neutral-900 text-neutral-950"
-                        : "border-transparent text-neutral-400 hover:text-neutral-700",
-                    ].join(" ")}
-                  >
-                    <span className="font-mono text-[10px] font-semibold tabular-nums">
-                      {item.index}
-                    </span>
-                    <span className="text-sm font-medium tracking-tight">{item.title}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </aside>
-
-          <div className="min-w-0 animate-[infoIn_0.65s_ease-out_0.15s_both]">
-            {active ? (
-              <article
-                key={active.id}
-                id="resource-panel"
-                role="region"
-                aria-live="polite"
-                className="animate-[infoPanel_0.35s_ease-out_both]"
+        {mobileMenuOpen ? (
+          <div className="relative z-20 mx-auto max-w-5xl px-6 pt-3 md:hidden">
+            <div className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
+              <Link
+                to="/information"
+                className="block rounded-xl px-3 py-2 text-sm font-semibold text-neutral-900 hover:bg-neutral-50"
+                onClick={() => setMobileMenuOpen(false)}
               >
-                <div className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-neutral-300/70 pb-5">
-                  <div className="min-w-0">
-                    <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span className="font-mono text-[11px] font-semibold tabular-nums text-neutral-400">
-                        {active.index}
-                      </span>
-                      <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">
-                        {active.meta}
-                      </span>
-                    </div>
-                    <h2 className="text-2xl font-semibold tracking-tight text-neutral-950 sm:text-[1.75rem]">
-                      {active.title}
-                    </h2>
-                  </div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">
-                    {active.note}
-                  </p>
-                </div>
-
-                <p className="mb-7 max-w-2xl text-sm leading-6 text-neutral-600 sm:text-[15px] sm:leading-7">
-                  {active.description}
-                </p>
-
-                {active.image ? (
-                  <figure className="overflow-hidden bg-white ring-1 ring-neutral-300/80">
-                    <img
-                      src={active.image}
-                      alt={active.title}
-                      className="block w-full object-contain"
-                    />
-                    <figcaption className="border-t border-neutral-200 px-4 py-2.5 text-xs text-neutral-500">
-                      Full guideline — scroll or zoom as needed
-                    </figcaption>
-                  </figure>
-                ) : null}
-
-                {active.video ? (
-                  <figure className="overflow-hidden bg-neutral-950 ring-1 ring-neutral-800">
-                    <video
-                      src={active.video}
-                      controls
-                      playsInline
-                      preload="metadata"
-                      className="block aspect-video w-full object-contain"
-                    >
-                      Your browser does not support video playback.
-                    </video>
-                    <figcaption className="border-t border-neutral-800 bg-neutral-950 px-4 py-2.5 text-xs text-neutral-400">
-                      Play with sound on for the full introduction
-                    </figcaption>
-                  </figure>
-                ) : null}
-
-                {active.steps ? (
-                  <ol className="space-y-8">
-                    {active.steps.map((step, i) => (
-                      <li key={step.title} className="grid gap-3 sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:gap-5">
-                        <span className="font-mono text-sm font-semibold tabular-nums text-neutral-400">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <div className="min-w-0 space-y-3">
-                          <h3 className="text-base font-semibold tracking-tight text-neutral-950 sm:text-lg">
-                            {step.title}
-                          </h3>
-                          <p className="max-w-2xl text-sm leading-6 text-neutral-600 sm:text-[15px] sm:leading-7">
-                            {step.body}
-                          </p>
-                          {step.links ? (
-                            <ul className="space-y-2">
-                              {step.links.map((link) => (
-                                <li key={link.href}>
-                                  <a
-                                    href={link.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 text-sm font-medium text-neutral-900 underline decoration-neutral-300 underline-offset-4 transition hover:decoration-neutral-900"
-                                  >
-                                    {link.icon ? <PlatformIcon platform={link.icon} /> : null}
-                                    {link.label}
-                                  </a>
-                                </li>
-                              ))}
-                            </ul>
-                          ) : null}
-                          {step.substeps ? (
-                            <ol className="max-w-2xl list-decimal space-y-2 pl-5 text-sm leading-6 text-neutral-600 sm:text-[15px] sm:leading-7">
-                              {step.substeps.map((sub) => (
-                                <li key={sub}>{sub}</li>
-                              ))}
-                            </ol>
-                          ) : null}
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                ) : null}
-              </article>
-            ) : (
-              <div
-                id="resource-panel"
-                role="region"
-                className="flex min-h-[16rem] items-center border border-dashed border-neutral-300/80 px-6 py-12 sm:min-h-[20rem]"
+                Information
+              </Link>
+              <Link
+                to="/about"
+                className="block rounded-xl px-3 py-2 text-sm font-semibold text-neutral-900 hover:bg-neutral-50"
+                onClick={() => setMobileMenuOpen(false)}
               >
-                <p className="max-w-xs text-sm leading-6 text-neutral-400 sm:text-[15px] sm:leading-7">
-                  Pick a guide from the list whenever you are ready. We will open it here for you.
-                </p>
-              </div>
-            )}
+                About us
+              </Link>
+            </div>
           </div>
-        </div>
+        ) : null}
 
-        <footer className="mt-16 border-t border-neutral-300/70 pb-6 pt-8 sm:mt-20">
-          <p className="text-right text-xs font-medium text-neutral-400">
-            © 2026 Information Technology Department RCMP
+        <div className="mx-auto w-full max-w-5xl px-6 pb-16 pt-16 sm:pt-20">
+          <h1 className="font-heading text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl">
+            Resources & guides
+          </h1>
+          <p className="mt-4 max-w-2xl text-[15px] leading-7 text-neutral-600">
+            Choose a resource from the list to view the full guideline or media.
           </p>
-        </footer>
-      </div>
 
-      <style>{`
-        @keyframes infoIn {
-          from { opacity: 0; transform: translateY(14px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes infoPanel {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </main>
+          <div className="mt-12 grid gap-10 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-16">
+            <nav aria-label="Resource contents" className="lg:sticky lg:top-8 lg:self-start">
+              <ul className="divide-y divide-neutral-200 border-y border-neutral-200">
+                {RESOURCES.map((item) => {
+                  const selected = item.id === active.id;
+                  return (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => selectResource(item.id)}
+                        aria-pressed={selected}
+                        className={`block w-full py-3 text-left text-[15px] ${
+                          selected ? "text-neutral-900" : "text-neutral-400 hover:text-neutral-700"
+                        }`}
+                      >
+                        {item.title}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+
+            <section aria-live="polite">
+              <p className="text-sm text-neutral-400">{active.note}</p>
+              <h2 className="mt-1 font-heading text-2xl font-bold tracking-tight text-neutral-900">
+                {active.title}
+              </h2>
+              <p className="mt-2 text-sm text-neutral-500">{active.meta}</p>
+              <p className="mt-5 max-w-2xl text-[15px] leading-7 text-neutral-600">
+                {active.description}
+              </p>
+
+              {active.image ? (
+                <figure className="mt-8">
+                  <img
+                    src={active.image}
+                    alt={active.title}
+                    className="block max-h-[70vh] w-full object-contain object-top"
+                  />
+                  <figcaption className="mt-2 text-xs text-neutral-500">
+                    Full guideline — scroll or zoom as needed
+                  </figcaption>
+                </figure>
+              ) : null}
+
+              {active.video ? (
+                <figure className="mt-8">
+                  <video
+                    src={active.video}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="block aspect-video w-full bg-neutral-950 object-contain"
+                  >
+                    Your browser does not support video playback.
+                  </video>
+                  <figcaption className="mt-2 text-xs text-neutral-500">
+                    Play with sound on for the full introduction
+                  </figcaption>
+                </figure>
+              ) : null}
+
+              {active.steps && openStep ? (
+                <div className="mt-8">
+                  <ol>
+                    {active.steps.map((step, i) => {
+                      const open = i === stepIndex;
+                      return (
+                        <li key={step.title} className="border-t border-neutral-200">
+                          <button
+                            type="button"
+                            onClick={() => setStepIndex(i)}
+                            aria-expanded={open}
+                            className={`w-full py-3 text-left text-[15px] ${
+                              open ? "text-neutral-900" : "text-neutral-400 hover:text-neutral-700"
+                            }`}
+                          >
+                            {i + 1}. {step.title}
+                          </button>
+                          {open ? (
+                            <div className="pb-6">
+                              <p className="max-w-2xl text-[15px] leading-7 text-neutral-600">
+                                {step.body}
+                              </p>
+                              {step.links ? (
+                                <ul className="mt-3 space-y-2">
+                                  {step.links.map((link) => (
+                                    <li key={link.href}>
+                                      <a
+                                        href={link.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 text-[15px] text-neutral-900 underline underline-offset-4"
+                                      >
+                                        {link.icon ? <PlatformIcon platform={link.icon} /> : null}
+                                        {link.label}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : null}
+                              {step.substeps ? (
+                                <ol className="mt-3 list-decimal space-y-2 pl-5 text-[15px] leading-7 text-neutral-600">
+                                  {step.substeps.map((sub) => (
+                                    <li key={sub}>{sub}</li>
+                                  ))}
+                                </ol>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </div>
+              ) : null}
+            </section>
+          </div>
+
+          <footer className="mt-16 border-t border-neutral-200 pt-8">
+            <p className="text-xs text-neutral-400">
+              © 2026 Information Technology Department RCMP
+            </p>
+          </footer>
+        </div>
+      </main>
+
+      <Link
+        to="/feedback"
+        className="fixed right-0 top-1/2 z-50 flex -translate-y-1/2 items-center rounded-l-md bg-[#0077C8] px-2.5 py-4 text-sm font-semibold text-white shadow-md transition hover:bg-[#0066AD]"
+        aria-label="Send Feedback"
+      >
+        <span className="rotate-180 [writing-mode:vertical-rl]">Send Feedback</span>
+      </Link>
+    </>
   );
 }

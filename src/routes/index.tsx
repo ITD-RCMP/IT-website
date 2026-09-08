@@ -94,15 +94,6 @@ function Index() {
   const [showMaxhub, setShowMaxhub] = React.useState(false);
   const [showSystems, setShowSystems] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [greyLetters, setGreyLetters] = React.useState({
-    information: false,
-    technology: false,
-    department: false,
-  });
-
-  const setLetter = (key: keyof typeof greyLetters, value: boolean) => {
-    setGreyLetters((prev) => ({ ...prev, [key]: value }));
-  };
 
   const openMaxhub = () => {
     setShowMaxhub(true);
@@ -219,32 +210,9 @@ function Index() {
 
         {/* Center content */}
         <div className="relative z-10 text-center">
-          <p className="mb-4 text-neutral-500 font-bold text-3xl">ONE STOP CENTER</p>
-          <h1 className="font-sans text-4xl font-bold leading-[0.95] tracking-tight text-neutral-900 sm:text-6xl md:text-7xl lg:text-8xl">
-            <span
-              onMouseEnter={() => setLetter("information", true)}
-              onMouseLeave={() => setLetter("information", false)}
-              className="cursor-default"
-            >
-              <span className={greyLetters.information ? "text-neutral-400 transition-colors" : "transition-colors"}>I</span>
-              NFORMATION
-            </span>{" "}
-            <span
-              onMouseEnter={() => setLetter("technology", true)}
-              onMouseLeave={() => setLetter("technology", false)}
-              className="cursor-default"
-            >
-              <span className={greyLetters.technology ? "text-neutral-400 transition-colors" : "transition-colors"}>T</span>
-              ECHNOLOGY
-            </span>{" "}
-            <span
-              onMouseEnter={() => setLetter("department", true)}
-              onMouseLeave={() => setLetter("department", false)}
-              className="cursor-default"
-            >
-              <span className={greyLetters.department ? "text-neutral-400 transition-colors" : "transition-colors"}>D</span>
-              EPARTMENT
-            </span>
+          <p className="mb-4 font-heading text-3xl font-bold tracking-wide text-neutral-500">ONE STOP CENTER</p>
+          <h1 className="font-heading text-4xl font-bold leading-[0.95] tracking-tight text-neutral-900 sm:text-6xl md:text-7xl lg:text-8xl">
+            INFORMATION TECHNOLOGY DEPARTMENT
           </h1>
           <p className="mt-6 text-lg font-medium text-neutral-600 md:text-xl">
             10+ Services <span className="mx-2 text-neutral-300">|</span> 3 Internal Systems
