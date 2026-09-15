@@ -11,14 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as InformationRouteImport } from './routes/information'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AuthMicrosoftRouteImport } from './routes/auth.microsoft'
 import { Route as AdminManageFeedbackRouteImport } from './routes/admin.manage-feedback'
+import { Route as AuthMicrosoftStartRouteImport } from './routes/auth.microsoft.start'
+import { Route as AuthMicrosoftCallbackRouteImport } from './routes/auth.microsoft.callback'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -28,11 +30,6 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InformationRoute = InformationRouteImport.update({
@@ -65,10 +62,25 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AuthMicrosoftRoute = AuthMicrosoftRouteImport.update({
+  id: '/auth/microsoft',
+  path: '/auth/microsoft',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminManageFeedbackRoute = AdminManageFeedbackRouteImport.update({
   id: '/manage-feedback',
   path: '/manage-feedback',
   getParentRoute: () => AdminRoute,
+} as any)
+const AuthMicrosoftStartRoute = AuthMicrosoftStartRouteImport.update({
+  id: '/start',
+  path: '/start',
+  getParentRoute: () => AuthMicrosoftRoute,
+} as any)
+const AuthMicrosoftCallbackRoute = AuthMicrosoftCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthMicrosoftRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -77,22 +89,26 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/feedback': typeof FeedbackRoute
   '/information': typeof InformationRoute
-  '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/manage-feedback': typeof AdminManageFeedbackRoute
+  '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
   '/admin/': typeof AdminIndexRoute
+  '/auth/microsoft/callback': typeof AuthMicrosoftCallbackRoute
+  '/auth/microsoft/start': typeof AuthMicrosoftStartRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/feedback': typeof FeedbackRoute
   '/information': typeof InformationRoute
-  '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/manage-feedback': typeof AdminManageFeedbackRoute
+  '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
   '/admin': typeof AdminIndexRoute
+  '/auth/microsoft/callback': typeof AuthMicrosoftCallbackRoute
+  '/auth/microsoft/start': typeof AuthMicrosoftStartRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -101,11 +117,13 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/feedback': typeof FeedbackRoute
   '/information': typeof InformationRoute
-  '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/manage-feedback': typeof AdminManageFeedbackRoute
+  '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
   '/admin/': typeof AdminIndexRoute
+  '/auth/microsoft/callback': typeof AuthMicrosoftCallbackRoute
+  '/auth/microsoft/start': typeof AuthMicrosoftStartRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -115,22 +133,26 @@ export interface FileRouteTypes {
     | '/admin'
     | '/feedback'
     | '/information'
-    | '/login'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/manage-feedback'
+    | '/auth/microsoft'
     | '/admin/'
+    | '/auth/microsoft/callback'
+    | '/auth/microsoft/start'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/feedback'
     | '/information'
-    | '/login'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/manage-feedback'
+    | '/auth/microsoft'
     | '/admin'
+    | '/auth/microsoft/callback'
+    | '/auth/microsoft/start'
   id:
     | '__root__'
     | '/'
@@ -138,11 +160,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/feedback'
     | '/information'
-    | '/login'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/manage-feedback'
+    | '/auth/microsoft'
     | '/admin/'
+    | '/auth/microsoft/callback'
+    | '/auth/microsoft/start'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -151,9 +175,9 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   FeedbackRoute: typeof FeedbackRoute
   InformationRoute: typeof InformationRoute
-  LoginRoute: typeof LoginRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AuthMicrosoftRoute: typeof AuthMicrosoftRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -170,13 +194,6 @@ declare module '@tanstack/react-router' {
       path: '/robots.txt'
       fullPath: '/robots.txt'
       preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/information': {
@@ -221,12 +238,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/auth/microsoft': {
+      id: '/auth/microsoft'
+      path: '/auth/microsoft'
+      fullPath: '/auth/microsoft'
+      preLoaderRoute: typeof AuthMicrosoftRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/manage-feedback': {
       id: '/admin/manage-feedback'
       path: '/manage-feedback'
       fullPath: '/admin/manage-feedback'
       preLoaderRoute: typeof AdminManageFeedbackRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/auth/microsoft/start': {
+      id: '/auth/microsoft/start'
+      path: '/start'
+      fullPath: '/auth/microsoft/start'
+      preLoaderRoute: typeof AuthMicrosoftStartRouteImport
+      parentRoute: typeof AuthMicrosoftRoute
+    }
+    '/auth/microsoft/callback': {
+      id: '/auth/microsoft/callback'
+      path: '/callback'
+      fullPath: '/auth/microsoft/callback'
+      preLoaderRoute: typeof AuthMicrosoftCallbackRouteImport
+      parentRoute: typeof AuthMicrosoftRoute
     }
   }
 }
@@ -243,15 +281,29 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AuthMicrosoftRouteChildren {
+  AuthMicrosoftCallbackRoute: typeof AuthMicrosoftCallbackRoute
+  AuthMicrosoftStartRoute: typeof AuthMicrosoftStartRoute
+}
+
+const AuthMicrosoftRouteChildren: AuthMicrosoftRouteChildren = {
+  AuthMicrosoftCallbackRoute: AuthMicrosoftCallbackRoute,
+  AuthMicrosoftStartRoute: AuthMicrosoftStartRoute,
+}
+
+const AuthMicrosoftRouteWithChildren = AuthMicrosoftRoute._addFileChildren(
+  AuthMicrosoftRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   FeedbackRoute: FeedbackRoute,
   InformationRoute: InformationRoute,
-  LoginRoute: LoginRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AuthMicrosoftRoute: AuthMicrosoftRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

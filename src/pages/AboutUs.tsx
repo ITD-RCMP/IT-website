@@ -29,7 +29,7 @@ const FOCUS = [
   },
 ] as const;
 
-export default function AboutUs() {
+export default function AboutUs({ authError = "" }: { authError?: string }) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [tilted, setTilted] = React.useState<(typeof FOCUS)[number]["key"] | null>(null);
 
@@ -163,17 +163,26 @@ export default function AboutUs() {
           </section>
 
           <footer className="mt-16 border-t border-neutral-200 pb-8 pt-8">
+            {authError ? (
+              <p className="mb-4 text-right text-sm font-medium text-red-600" role="alert">
+                {authError}
+              </p>
+            ) : null}
             <p className="text-right text-xs font-medium text-neutral-400">
               © 2026 Information Technology Department RCMP
               <span className="mx-2 text-neutral-300" aria-hidden="true">
                 ·
               </span>
-              <Link
-                to="/login"
+              <a
+                href="/auth/microsoft/start"
+                onClick={(event) => {
+                  event.preventDefault();
+                  window.location.assign("/auth/microsoft/start");
+                }}
                 className="text-neutral-300 transition hover:text-neutral-500"
               >
                 Staff
-              </Link>
+              </a>
             </p>
           </footer>
         </div>

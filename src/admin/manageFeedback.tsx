@@ -56,7 +56,7 @@ export default function ManageFeedback() {
     setBusy(true);
     try {
       await logout();
-      await navigate({ to: "/login" });
+      await navigate({ to: "/about" });
     } finally {
       setBusy(false);
     }

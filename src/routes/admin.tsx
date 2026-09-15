@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
     const user = await getAuthUser();
     if (!user) {
-      throw redirect({ to: "/login" });
+      throw redirect({ href: "/auth/microsoft/start" });
     }
     return { user };
   },

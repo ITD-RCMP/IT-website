@@ -110,7 +110,7 @@ export default function AdminDashboard() {
     setBusy(true);
     try {
       await logout();
-      await navigate({ to: "/login" });
+      await navigate({ to: "/about" });
     } finally {
       setBusy(false);
     }

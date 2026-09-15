@@ -11,7 +11,11 @@ function mysqlEnvPlugin(): Plugin {
       const env = loadEnv(mode, process.cwd(), "");
       for (const [key, value] of Object.entries(env)) {
         if (process.env[key] !== undefined) continue;
-        if (key.startsWith("MYSQL_") || SERVER_ENV_KEYS.includes(key as (typeof SERVER_ENV_KEYS)[number])) {
+        if (
+          key.startsWith("MYSQL_") ||
+          key.startsWith("MICROSOFT_") ||
+          SERVER_ENV_KEYS.includes(key as (typeof SERVER_ENV_KEYS)[number])
+        ) {
           process.env[key] = value;
         }
       }
@@ -34,7 +38,8 @@ export default defineConfig({
       filter: ({ path }: { path: string }) =>
         path !== "/feedback" &&
         !path.startsWith("/feedback/") &&
-        !path.startsWith("/admin"),
+        !path.startsWith("/admin") &&
+        !path.startsWith("/auth"),
     },
     server: { entry: "server" },
   },
