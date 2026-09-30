@@ -31,7 +31,7 @@ const OAUTH_MAX_AGE = 60 * 10;
 const OAUTH_STATE_COOKIE = "itd_ms_state";
 const OAUTH_VERIFIER_COOKIE = "itd_ms_verifier";
 const OAUTH_NONCE_COOKIE = "itd_ms_nonce";
-const MICROSOFT_SCOPES = "openid profile email User.Read";
+const MICROSOFT_SCOPES = "openid profile email";
 
 function encodeSession(session: AuthUser): string {
   return Buffer.from(JSON.stringify(session), "utf8").toString("base64url");
@@ -86,7 +86,7 @@ function setOauthCookie(name: string, value: string) {
 }
 
 function clearOauthCookies() {
-  const options = { path: "/" };
+  const options = { path: "/", secure: cookieSecure(), sameSite: "lax" as const };
   deleteCookie(OAUTH_STATE_COOKIE, options);
   deleteCookie(OAUTH_VERIFIER_COOKIE, options);
   deleteCookie(OAUTH_NONCE_COOKIE, options);
@@ -115,10 +115,50 @@ function redirectTo(url: string): Response {
   });
 }
 
+function publicProtocol(): "http" | "https" | null {
+  try {
+    const proto = getRequestProtocol();
+    if (proto === "https") return "https";
+    if (proto === "http") return "http";
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function appUrl(request: Request, pathname: string, search?: Record<string, string>): string {
+  const url = new URL(pathname, request.url);
+  const proto = publicProtocol();
+  if (proto) url.protocol = `${proto}:`;
+  if (search) {
+    for (const [key, value] of Object.entries(search)) url.searchParams.set(key, value);
+  }
+  return url.toString();
+}
+
 function loginError(request: Request, code: string): Response {
-  const url = new URL("/about", request.url);
-  url.searchParams.set("error", code);
-  return redirectTo(url.toString());
+  return redirectTo(appUrl(request, "/about", { error: code }));
+}
+
+function queryParam(url: URL, name: string): string | null {
+  const raw = url.search.startsWith("?") ? url.search.slice(1) : url.search;
+  if (!raw) return null;
+  for (const part of raw.split("&")) {
+    if (!part) continue;
+    const eq = part.indexOf("=");
+    const rawKey = eq === -1 ? part : part.slice(0, eq);
+    const rawValue = eq === -1 ? "" : part.slice(eq + 1);
+    let key = rawKey;
+    let value = rawValue;
+    try {
+      key = decodeURIComponent(rawKey.replace(/\+/g, "%2B"));
+      value = decodeURIComponent(rawValue.replace(/\+/g, "%2B"));
+    } catch {
+      continue;
+    }
+    if (key === name) return value;
+  }
+  return null;
 }
 
 function getMicrosoftConfig(): MicrosoftConfig | null {
@@ -134,9 +174,16 @@ function getMicrosoftConfig(): MicrosoftConfig | null {
 }
 
 function microsoftRedirectUri(request: Request): string {
+  const origin = new URL(appUrl(request, "/")).origin;
+  const callback = `${origin}/auth/microsoft/callback`;
   const configured = process.env.MICROSOFT_REDIRECT_URI?.trim();
-  if (configured) return configured;
-  return `${new URL(request.url).origin}/auth/microsoft/callback`;
+  if (!configured) return callback;
+  try {
+    if (new URL(configured).origin === origin) return configured;
+  } catch {
+    return callback;
+  }
+  return callback;
 }
 
 function microsoftAuthority(tenantId: string): string {
@@ -144,7 +191,7 @@ function microsoftAuthority(tenantId: string): string {
 }
 
 function emailFromPayload(payload: JWTPayload): string | null {
-  const candidates = [payload.email, payload.preferred_username, payload.upn];
+  const candidates = [payload.email, payload.preferred_username, payload.upn, payload.unique_name];
   for (const value of candidates) {
     if (typeof value === "string" && value.includes("@")) {
       return value.trim().toLowerCase();
@@ -173,15 +220,41 @@ function oidFromPayload(payload: JWTPayload): string | null {
   return typeof payload.oid === "string" && payload.oid.trim() ? payload.oid.trim() : null;
 }
 
+function isMissingOidColumn(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const err = error as { code?: string; sqlMessage?: string; message?: string };
+  const message = `${err.sqlMessage ?? ""} ${err.message ?? ""}`;
+  return err.code === "ER_BAD_FIELD_ERROR" && message.includes("oid");
+}
+
+async function loadUserByEmail(email: string): Promise<UserRow | null> {
+  try {
+    const rows = await query<UserRow[]>("SELECT id, email, oid FROM users WHERE email = ? LIMIT 1", [email]);
+    return rows[0] ?? null;
+  } catch (error) {
+    if (!isMissingOidColumn(error)) throw error;
+    await getDb()
+      .execute("ALTER TABLE users ADD COLUMN oid VARCHAR(64) NULL")
+      .catch(() => undefined);
+    try {
+      const rows = await query<UserRow[]>("SELECT id, email, oid FROM users WHERE email = ? LIMIT 1", [email]);
+      return rows[0] ?? null;
+    } catch (retryError) {
+      if (!isMissingOidColumn(retryError)) throw retryError;
+      const rows = await query<UserRow[]>("SELECT id, email FROM users WHERE email = ? LIMIT 1", [email]);
+      return rows[0] ?? null;
+    }
+  }
+}
+
 async function findAuthorizedUser(email: string, oid: string): Promise<AuthUser | null> {
-  const rows = await query<UserRow[]>("SELECT id, email, oid FROM users WHERE email = ? LIMIT 1", [email]);
-  const row = rows[0];
+  const row = await loadUserByEmail(email);
   if (!row) return null;
 
   const storedOid = row.oid ? String(row.oid) : "";
   if (storedOid && storedOid !== oid) return null;
 
-  if (!storedOid) {
+  if (!storedOid && "oid" in row) {
     await getDb().execute("UPDATE users SET oid = ? WHERE id = ? AND oid IS NULL", [oid, Number(row.id)]);
   }
 
@@ -226,14 +299,14 @@ export async function finishMicrosoftSso(request: Request): Promise<Response> {
   }
 
   const url = new URL(request.url);
-  const oauthError = url.searchParams.get("error");
+  const oauthError = queryParam(url, "error");
   if (oauthError) {
     clearOauthCookies();
     return loginError(request, oauthError === "access_denied" ? "access_denied" : "failed");
   }
 
-  const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
+  const code = queryParam(url, "code");
+  const state = queryParam(url, "state");
   const expectedState = getCookie(OAUTH_STATE_COOKIE);
   const verifier = getCookie(OAUTH_VERIFIER_COOKIE);
   const expectedNonce = getCookie(OAUTH_NONCE_COOKIE);
@@ -258,8 +331,13 @@ export async function finishMicrosoftSso(request: Request): Promise<Response> {
     });
 
     if (!tokenResponse.ok) {
-      console.error("Microsoft token exchange failed:", tokenResponse.status);
-      return loginError(request, "failed");
+      const failure = (await tokenResponse.json().catch(() => null)) as {
+        error?: string;
+        error_description?: string;
+      } | null;
+      const description = failure?.error_description?.split("\r\n")[0] ?? "";
+      console.error("Microsoft token exchange failed:", tokenResponse.status, failure?.error, description);
+      return loginError(request, failure?.error === "invalid_client" ? "config" : "failed");
     }
 
     const tokens = (await tokenResponse.json()) as {
@@ -276,6 +354,7 @@ export async function finishMicrosoftSso(request: Request): Promise<Response> {
     );
     const { payload } = await jwtVerify(tokens.id_token, jwks, {
       audience: config.clientId,
+      clockTolerance: 60,
     });
 
     const tenant =
@@ -323,7 +402,7 @@ export async function finishMicrosoftSso(request: Request): Promise<Response> {
     }
 
     writeAuthSession(user);
-    return redirectTo(new URL("/admin", request.url).toString());
+    return redirectTo(appUrl(request, "/admin"));
   } catch (error) {
     console.error("finishMicrosoftSso failed:", error);
     return loginError(request, "failed");
