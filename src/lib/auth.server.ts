@@ -161,22 +161,35 @@ function queryParam(url: URL, name: string): string | null {
   return null;
 }
 
+type MicrosoftSetting = "CLIENT_ID" | "CLIENT_SECRET" | "TENANT_ID" | "REDIRECT_URI" | "ALLOWED_DOMAIN";
+
+function isDevAuth(): boolean {
+  if (process.env.AUTH_ENV === "development") return true;
+  if (process.env.AUTH_ENV === "production") return false;
+  return process.env.NODE_ENV === "development";
+}
+
+function microsoftEnv(name: MicrosoftSetting): string {
+  const key = isDevAuth() ? `MICROSOFT_DEV_${name}` : `MICROSOFT_${name}`;
+  return process.env[key]?.trim() ?? "";
+}
+
 function getMicrosoftConfig(): MicrosoftConfig | null {
-  const clientId = process.env.MICROSOFT_CLIENT_ID?.trim();
-  const clientSecret = process.env.MICROSOFT_CLIENT_SECRET?.trim();
-  const tenantId = process.env.MICROSOFT_TENANT_ID?.trim();
+  const clientId = microsoftEnv("CLIENT_ID");
+  const clientSecret = microsoftEnv("CLIENT_SECRET");
+  const tenantId = microsoftEnv("TENANT_ID");
   if (!clientId || !clientSecret || !tenantId) {
     return null;
   }
 
-  const allowedDomain = process.env.MICROSOFT_ALLOWED_DOMAIN?.trim().toLowerCase().replace(/^@/, "") || null;
+  const allowedDomain = microsoftEnv("ALLOWED_DOMAIN").toLowerCase().replace(/^@/, "") || null;
   return { clientId, clientSecret, tenantId, allowedDomain };
 }
 
 function microsoftRedirectUri(request: Request): string {
   const origin = new URL(appUrl(request, "/")).origin;
   const callback = `${origin}/auth/microsoft/callback`;
-  const configured = process.env.MICROSOFT_REDIRECT_URI?.trim();
+  const configured = microsoftEnv("REDIRECT_URI");
   if (!configured) return callback;
   try {
     if (new URL(configured).origin === origin) return configured;
@@ -409,10 +422,12 @@ export async function finishMicrosoftSso(request: Request): Promise<Response> {
   }
 }
 
+const DEV_STAFF_USER: AuthUser = { id: 0, email: "staff@localhost" };
+
 export function readAuthSession(): AuthUser | null {
   const raw = getCookie(SESSION_COOKIE);
-  if (!raw) return null;
-  return decodeSession(raw);
+  if (raw) return decodeSession(raw);
+  return isDevAuth() ? DEV_STAFF_USER : null;
 }
 
 export function clearAuthSession() {

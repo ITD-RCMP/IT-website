@@ -173,16 +173,22 @@ export default function AboutUs({ authError = "" }: { authError?: string }) {
               <span className="mx-2 text-neutral-300" aria-hidden="true">
                 ·
               </span>
-              <a
-                href="/auth/microsoft/start"
-                onClick={(event) => {
-                  event.preventDefault();
-                  window.location.assign("/auth/microsoft/start");
-                }}
-                className="text-neutral-300 transition hover:text-neutral-500"
-              >
-                Staff
-              </a>
+              {import.meta.env.DEV ? (
+                <Link to="/admin" className="text-neutral-300 transition hover:text-neutral-500">
+                  Staff
+                </Link>
+              ) : (
+                <a
+                  href="/auth/microsoft/start"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    window.location.assign("/auth/microsoft/start");
+                  }}
+                  className="text-neutral-300 transition hover:text-neutral-500"
+                >
+                  Staff
+                </a>
+              )}
             </p>
           </footer>
         </div>

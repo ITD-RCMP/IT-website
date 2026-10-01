@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLoaderData, useNavigate, useRouteContext, useSearch } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { downloadFeedbackPdf } from "@/admin/exportFeedbackPdf";
 import { logoutUser } from "@/lib/auth";
 import { RATING_LABELS } from "@/lib/feedback";
 import type { FeedbackStats } from "@/lib/feedback-api";
@@ -85,6 +86,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const logout = useServerFn(logoutUser);
   const [busy, setBusy] = React.useState(false);
+  const [exporting, setExporting] = React.useState(false);
   const [showAllSuggestions, setShowAllSuggestions] = React.useState(false);
 
   React.useEffect(() => {
@@ -104,6 +106,15 @@ export default function AdminDashboard() {
 
   const setFilter = (nextYear: number, nextMonth: number) => {
     void navigate({ to: "/admin", search: { year: nextYear, month: nextMonth } });
+  };
+
+  const handleExportPdf = async () => {
+    setExporting(true);
+    try {
+      await downloadFeedbackPdf(stats, year, month);
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -202,6 +213,14 @@ export default function AdminDashboard() {
               >
                 Manage feedback
               </Link>
+              <button
+                type="button"
+                onClick={() => void handleExportPdf()}
+                disabled={exporting}
+                className="inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-50 disabled:opacity-50"
+              >
+                {exporting ? "Exporting…" : "Export PDF"}
+              </button>
             </div>
           </div>
 
