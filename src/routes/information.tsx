@@ -5,7 +5,7 @@ import { createSeoHead, webPageJsonLd } from "@/lib/seo";
 
 const title = "Information";
 const description =
-  "Guides and resources from the RCMP IT Department, including wireless microphone usage and department introductions.";
+  "Guides and resources from the RCMP IT Department, including the new student login guide, wireless microphone usage, and department introductions.";
 
 export const Route = createFileRoute("/information")({
   head: () =>

@@ -38,6 +38,7 @@ type Resource = {
   description: string;
   note: string;
   image?: string;
+  imageAlt?: string;
   video?: string;
   steps?: GuideStep[];
 };
@@ -100,7 +101,7 @@ const RESOURCES: Resource[] = [
   {
     id: "wow-video",
     index: "02",
-    title: "WOW Student",
+    title: "WOW Video",
     meta: "Department introduction for new students",
     description:
       "A short video introduction to help new incoming students get to know the IT department and how we support campus.",
@@ -117,32 +118,102 @@ const RESOURCES: Resource[] = [
     note: "Required before use",
     image: "/mic-guide.jpeg",
   },
+  {
+    id: "new-student-guide",
+    index: "04",
+    title: "New Student Guide",
+    meta: "How to log in to your UniKL applications",
+    description:
+      "A quick guide for new students on which username and password to use for Microsoft 365, Portal / ECITIE, UniKL Link and VLE.",
+    note: "For new students",
+    image: "/new-student-guide.png",
+    imageAlt:
+      "New Student Guide poster: how to log in to UniKL email, Microsoft 365, Portal / ECITIE, UniKL Link and VLE, and which password to use for each.",
+    steps: [
+      {
+        title: "Email from UniKL",
+        body: "You will receive an email from UniKL with your UniKL email address and a temporary password. Check your inbox and junk folder.",
+      },
+      {
+        title: "Log in to Microsoft Authenticator and Microsoft 365",
+        body: "Use the UniKL email and temporary password from that email to sign in to Microsoft Authenticator and Microsoft 365.",
+      },
+      {
+        title: "Credentials for UniKL applications",
+        body: "Each application uses a different combination:",
+        substeps: [
+          "Portal / ECITIE: username is your Student ID, password is your Portal password.",
+          "UniKL Link: username is your UniKL email, password is your Portal password.",
+          "VLE: username is your UniKL email, password is your Email password.",
+        ],
+      },
+      {
+        title: "UniKL Link tip",
+        body: 'Key in your email without "@s.unikl.edu.my". Don\'t use "Sign in with Microsoft", as it has technical issues.',
+      },
+      {
+        title: "Which password goes where?",
+        body: "You have two different passwords:",
+        substeps: [
+          "Portal password: Portal / ECITIE and UniKL Link.",
+          "Email password: Microsoft 365, VLE and your UniKL email account.",
+        ],
+      },
+      {
+        title: "Avoid common issues",
+        body: "Keep these in mind:",
+        substeps: [
+          "Check your inbox and junk folder for the UniKL email.",
+          "Portal and Email passwords are different, so don't mix them up.",
+          "Keep your temporary password private.",
+          "Never share your password or OTP with anyone.",
+          "Still can't log in? Contact the IT Department for help.",
+        ],
+      },
+    ],
+  },
 ];
+
+function readHash() {
+  const id = window.location.hash.replace("#", "");
+  return RESOURCES.some((item) => item.id === id) ? id : null;
+}
 
 export default function Information() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [activeId, setActiveId] = React.useState(RESOURCES[0].id);
-  const [stepIndex, setStepIndex] = React.useState(0);
-  const active = RESOURCES.find((r) => r.id === activeId) ?? RESOURCES[0];
-  const openStep = active.steps?.[stepIndex];
+  const [activeId, setActiveId] = React.useState<string | null>(null);
+  const detailRef = React.useRef<HTMLHeadingElement>(null);
+  const active = RESOURCES.find((item) => item.id === activeId) ?? null;
 
   React.useEffect(() => {
-    const id = window.location.hash.replace("#", "");
-    if (!RESOURCES.some((r) => r.id === id)) return;
-    setActiveId(id);
-    setStepIndex(0);
+    const sync = () => setActiveId(readHash());
+    sync();
+    window.addEventListener("popstate", sync);
+    return () => window.removeEventListener("popstate", sync);
   }, []);
 
-  const selectResource = (id: string) => {
+  React.useEffect(() => {
+    if (!active) return;
+    detailRef.current?.focus();
+    window.scrollTo(0, 0);
+  }, [active]);
+
+  const openResource = (id: string) => {
+    const url = `${window.location.pathname}${window.location.search}#${id}`;
+    window.history.pushState(null, "", url);
     setActiveId(id);
-    setStepIndex(0);
-    window.history.replaceState(null, "", `#${id}`);
+  };
+
+  const closeResource = () => {
+    window.history.pushState(null, "", `${window.location.pathname}${window.location.search}`);
+    setActiveId(null);
+    window.scrollTo(0, 0);
   };
 
   return (
     <>
       <main className="relative min-h-screen bg-white text-neutral-900">
-        <header className="relative z-20 mx-auto flex max-w-5xl items-center justify-between px-6 pt-6">
+        <header className="relative z-20 mx-auto flex max-w-3xl items-center justify-between px-6 pt-6">
           <Link to="/" aria-label="Home">
             <img
               src="/unikl-official.png"
@@ -173,7 +244,7 @@ export default function Information() {
         </header>
 
         {mobileMenuOpen ? (
-          <div className="relative z-20 mx-auto max-w-5xl px-6 pt-3 md:hidden">
+          <div className="relative z-20 mx-auto max-w-3xl px-6 pt-3 md:hidden">
             <div className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
               <Link
                 to="/information"
@@ -193,133 +264,140 @@ export default function Information() {
           </div>
         ) : null}
 
-        <div className="mx-auto w-full max-w-5xl px-6 pb-16 pt-16 sm:pt-20">
-          <h1 className="font-heading text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl">
-            Resources & guides
-          </h1>
-          <p className="mt-4 max-w-2xl text-[15px] leading-7 text-neutral-600">
-            Choose a resource from the list to view the full guideline or media.
-          </p>
+        <div className="mx-auto w-full max-w-3xl px-6 pb-20 pt-16 sm:pt-24">
+          {active ? (
+            <article>
+              <button
+                type="button"
+                onClick={closeResource}
+                className="inline-flex items-center gap-2 rounded-full text-sm font-semibold text-neutral-600 transition hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0077C8] active:translate-y-px"
+              >
+                <span aria-hidden="true">←</span>
+                All guides
+              </button>
 
-          <div className="mt-12 grid gap-10 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-16">
-            <nav aria-label="Resource contents" className="lg:sticky lg:top-8 lg:self-start">
-              <ul className="divide-y divide-neutral-200 border-y border-neutral-200">
-                {RESOURCES.map((item) => {
-                  const selected = item.id === active.id;
-                  return (
-                    <li key={item.id}>
-                      <button
-                        type="button"
-                        onClick={() => selectResource(item.id)}
-                        aria-pressed={selected}
-                        className={`block w-full py-3 text-left text-[15px] ${
-                          selected ? "text-neutral-900" : "text-neutral-400 hover:text-neutral-700"
-                        }`}
-                      >
-                        {item.title}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-
-            <section aria-live="polite">
-              <p className="text-sm text-neutral-400">{active.note}</p>
-              <h2 className="mt-1 font-heading text-2xl font-bold tracking-tight text-neutral-900">
+              <p className="mt-8 text-sm font-medium text-[#0077C8]">{active.note}</p>
+              <h1
+                ref={detailRef}
+                tabIndex={-1}
+                className="mt-2 font-heading text-4xl font-bold tracking-tight text-neutral-900 outline-none sm:text-5xl"
+              >
                 {active.title}
-              </h2>
-              <p className="mt-2 text-sm text-neutral-500">{active.meta}</p>
-              <p className="mt-5 max-w-2xl text-[15px] leading-7 text-neutral-600">
+              </h1>
+              <p className="mt-3 text-base text-neutral-500">{active.meta}</p>
+              <p className="mt-6 max-w-2xl text-[15px] leading-7 text-neutral-600">
                 {active.description}
               </p>
 
               {active.image ? (
-                <figure className="mt-8">
-                  <img
-                    src={active.image}
-                    alt={active.title}
-                    className="block max-h-[70vh] w-full object-contain object-top"
-                  />
-                  <figcaption className="mt-2 text-xs text-neutral-500">
-                    Full guideline — scroll or zoom as needed
+                <figure className="mt-10">
+                  <a href={active.image} target="_blank" rel="noopener noreferrer" className="block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0077C8]">
+                    <img
+                      src={active.image}
+                      alt={active.imageAlt ?? active.title}
+                      className="block max-h-[70vh] w-full rounded-2xl border border-neutral-200 object-contain object-top"
+                    />
+                  </a>
+                  <figcaption className="mt-3 text-xs text-neutral-500">
+                    Open the image to view it full size.
                   </figcaption>
                 </figure>
               ) : null}
 
               {active.video ? (
-                <figure className="mt-8">
+                <figure className="mt-10">
                   <video
                     src={active.video}
                     controls
                     playsInline
                     preload="metadata"
-                    className="block aspect-video w-full bg-neutral-950 object-contain"
+                    className="block aspect-video w-full rounded-2xl bg-neutral-950 object-contain"
                   >
                     Your browser does not support video playback.
                   </video>
-                  <figcaption className="mt-2 text-xs text-neutral-500">
-                    Play with sound on for the full introduction
+                  <figcaption className="mt-3 text-xs text-neutral-500">
+                    Play with sound on for the full introduction.
                   </figcaption>
                 </figure>
               ) : null}
 
-              {active.steps && openStep ? (
-                <div className="mt-8">
-                  <ol>
-                    {active.steps.map((step, i) => {
-                      const open = i === stepIndex;
-                      return (
-                        <li key={step.title} className="border-t border-neutral-200">
-                          <button
-                            type="button"
-                            onClick={() => setStepIndex(i)}
-                            aria-expanded={open}
-                            className={`w-full py-3 text-left text-[15px] ${
-                              open ? "text-neutral-900" : "text-neutral-400 hover:text-neutral-700"
-                            }`}
-                          >
-                            {i + 1}. {step.title}
-                          </button>
-                          {open ? (
-                            <div className="pb-6">
-                              <p className="max-w-2xl text-[15px] leading-7 text-neutral-600">
-                                {step.body}
-                              </p>
-                              {step.links ? (
-                                <ul className="mt-3 space-y-2">
-                                  {step.links.map((link) => (
-                                    <li key={link.href}>
-                                      <a
-                                        href={link.href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 text-[15px] text-neutral-900 underline underline-offset-4"
-                                      >
-                                        {link.icon ? <PlatformIcon platform={link.icon} /> : null}
-                                        {link.label}
-                                      </a>
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : null}
-                              {step.substeps ? (
-                                <ol className="mt-3 list-decimal space-y-2 pl-5 text-[15px] leading-7 text-neutral-600">
-                                  {step.substeps.map((sub) => (
-                                    <li key={sub}>{sub}</li>
-                                  ))}
-                                </ol>
-                              ) : null}
-                            </div>
-                          ) : null}
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </div>
+              {active.steps ? (
+                <ol className="mt-12 space-y-10">
+                  {active.steps.map((step, i) => (
+                    <li key={step.title} className="border-t border-neutral-200 pt-8">
+                      <p className="text-sm font-medium text-neutral-400">{i + 1}</p>
+                      <h2 className="mt-1 font-heading text-xl font-bold tracking-tight text-neutral-900">
+                        {step.title}
+                      </h2>
+                      <p className="mt-3 max-w-2xl text-[15px] leading-7 text-neutral-600">
+                        {step.body}
+                      </p>
+                      {step.links ? (
+                        <ul className="mt-4 space-y-2">
+                          {step.links.map((link) => (
+                            <li key={link.href}>
+                              <a
+                                href={link.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 rounded-sm text-[15px] font-medium text-[#0077C8] underline decoration-[#0077C8]/30 underline-offset-4 hover:decoration-[#0077C8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0077C8]"
+                              >
+                                {link.icon ? <PlatformIcon platform={link.icon} /> : null}
+                                {link.label}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {step.substeps ? (
+                        <ol className="mt-4 list-decimal space-y-2 pl-5 text-[15px] leading-7 text-neutral-600">
+                          {step.substeps.map((sub) => (
+                            <li key={sub}>{sub}</li>
+                          ))}
+                        </ol>
+                      ) : null}
+                    </li>
+                  ))}
+                </ol>
               ) : null}
+            </article>
+          ) : (
+            <section>
+              <h1 className="font-heading text-4xl font-bold tracking-tight text-neutral-900 sm:text-6xl">
+                How can we help you?
+              </h1>
+              <p className="mt-4 max-w-xl text-base leading-7 text-neutral-600">
+                Pick a topic below and I’ll open the full guide.
+              </p>
+
+              <ul className="mt-12 border-t border-neutral-200">
+                {RESOURCES.map((item) => (
+                  <li key={item.id} className="border-b border-neutral-200">
+                    <button
+                      type="button"
+                      onClick={() => openResource(item.id)}
+                      className="group flex w-full items-start justify-between gap-6 py-6 text-left transition-colors hover:bg-neutral-50 focus-visible:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#0077C8] active:bg-neutral-100 sm:py-7"
+                    >
+                      <span className="min-w-0">
+                        <span className="block font-heading text-2xl font-bold tracking-tight text-neutral-900 group-hover:text-[#0077C8]">
+                          {item.title}
+                        </span>
+                        <span className="mt-1.5 block text-sm leading-6 text-neutral-500">
+                          {item.meta}
+                        </span>
+                        <span className="mt-2 block text-xs font-medium uppercase tracking-wide text-neutral-400">
+                          {item.note}
+                        </span>
+                      </span>
+                      <span aria-hidden="true" className="mt-1 shrink-0 text-lg text-neutral-300 transition group-hover:translate-x-0.5 group-hover:text-[#0077C8]">
+                        →
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </section>
-          </div>
+          )}
 
           <footer className="mt-16 border-t border-neutral-200 pt-8">
             <p className="text-xs text-neutral-400">
