@@ -172,6 +172,69 @@ const RESOURCES: Resource[] = [
       },
     ],
   },
+  {
+    id: "microsoft-authenticator",
+    index: "05",
+    title: "Microsoft Authenticator",
+    meta: "Set up the app that confirms your UniKL sign-in",
+    description:
+      "Microsoft Authenticator is the phone app UniKL uses to confirm it is really you when you sign in to Microsoft 365. Add your UniKL email once. After that, the app shows a code you approve on your phone.",
+    note: "For new students",
+    image: "/microsoft-install.png",
+    imageAlt:
+      "Poster: set up Microsoft Authenticator by adding your UniKL email in 7 steps, from installing the app to approving the sign-in code.",
+    steps: [
+      {
+        title: "What you need first",
+        body: "Have these ready before you start:",
+        substeps: [
+          "Your phone.",
+          "Your UniKL email and Email password, from the UniKL welcome email.",
+          "A computer or second screen showing Microsoft 365, for the QR code step.",
+        ],
+      },
+      {
+        title: "Get the app",
+        body: "Install Microsoft Authenticator from the App Store or Google Play, then open it. Look for the blue shield icon.",
+      },
+      {
+        title: "Add your account",
+        body: "In the app, tap the plus icon, or tap Add account.",
+      },
+      {
+        title: "Choose your school account",
+        body: "Select Work or school account. Do not choose Personal.",
+      },
+      {
+        title: "Sign in",
+        body: "Enter your UniKL email and your Email password. This is the password from the welcome email, not your Portal password.",
+      },
+      {
+        title: "Link it with Microsoft 365",
+        body: "Open Microsoft 365 on a computer or second screen. Scan the QR code with the app, or sign in to your account on that screen.",
+      },
+      {
+        title: "Approve with the code",
+        body: "A number will appear in Microsoft Authenticator. Enter or approve that number to confirm the sign-in.",
+      },
+      {
+        title: "You're all set",
+        body: "Your UniKL email is now set up in Microsoft Authenticator. Keep the app installed. You will need it each time you sign in.",
+      },
+      {
+        title: "Avoid common issues",
+        body: "If setup stalls, check these first:",
+        substeps: [
+          "Use your UniKL email, not a personal email.",
+          "Pick Work or school account, not Personal.",
+          "Keep your phone's date and time set automatically so the codes work.",
+          "Never share your codes with anyone.",
+          "Do not delete the app or the account after setup. You will need it to sign in.",
+          "Still stuck? Contact the IT Department.",
+        ],
+      },
+    ],
+  },
 ];
 
 function readHash() {
