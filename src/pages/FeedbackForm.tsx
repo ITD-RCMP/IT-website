@@ -76,7 +76,7 @@ export default function FeedbackForm() {
   const [step, setStep] = React.useState(0);
   const [category, setCategory] = React.useState<Category | "">("");
   const [ratings, setRatings] = React.useState<Ratings>({});
-  const [suggestions, setSuggestions] = React.useState("");
+  const [suggestions, setSuggestions] = React.useState("Very good services");
   const [loading, setLoading] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
   const [error, setError] = React.useState("");
