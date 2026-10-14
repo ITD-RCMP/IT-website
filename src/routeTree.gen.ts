@@ -17,6 +17,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as InformationIdRouteImport } from './routes/information.$id'
 import { Route as AuthMicrosoftRouteImport } from './routes/auth.microsoft'
 import { Route as AdminManageFeedbackRouteImport } from './routes/admin.manage-feedback'
 import { Route as AuthMicrosoftStartRouteImport } from './routes/auth.microsoft.start'
@@ -62,6 +63,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const InformationIdRoute = InformationIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => InformationRoute,
+} as any)
 const AuthMicrosoftRoute = AuthMicrosoftRouteImport.update({
   id: '/auth/microsoft',
   path: '/auth/microsoft',
@@ -88,11 +94,12 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/feedback': typeof FeedbackRoute
-  '/information': typeof InformationRoute
+  '/information': typeof InformationRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/manage-feedback': typeof AdminManageFeedbackRoute
   '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
+  '/information/$id': typeof InformationIdRoute
   '/admin/': typeof AdminIndexRoute
   '/auth/microsoft/callback': typeof AuthMicrosoftCallbackRoute
   '/auth/microsoft/start': typeof AuthMicrosoftStartRoute
@@ -101,11 +108,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/feedback': typeof FeedbackRoute
-  '/information': typeof InformationRoute
+  '/information': typeof InformationRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/manage-feedback': typeof AdminManageFeedbackRoute
   '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
+  '/information/$id': typeof InformationIdRoute
   '/admin': typeof AdminIndexRoute
   '/auth/microsoft/callback': typeof AuthMicrosoftCallbackRoute
   '/auth/microsoft/start': typeof AuthMicrosoftStartRoute
@@ -116,11 +124,12 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/feedback': typeof FeedbackRoute
-  '/information': typeof InformationRoute
+  '/information': typeof InformationRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/manage-feedback': typeof AdminManageFeedbackRoute
   '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
+  '/information/$id': typeof InformationIdRoute
   '/admin/': typeof AdminIndexRoute
   '/auth/microsoft/callback': typeof AuthMicrosoftCallbackRoute
   '/auth/microsoft/start': typeof AuthMicrosoftStartRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin/manage-feedback'
     | '/auth/microsoft'
+    | '/information/$id'
     | '/admin/'
     | '/auth/microsoft/callback'
     | '/auth/microsoft/start'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin/manage-feedback'
     | '/auth/microsoft'
+    | '/information/$id'
     | '/admin'
     | '/auth/microsoft/callback'
     | '/auth/microsoft/start'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin/manage-feedback'
     | '/auth/microsoft'
+    | '/information/$id'
     | '/admin/'
     | '/auth/microsoft/callback'
     | '/auth/microsoft/start'
@@ -174,7 +186,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   FeedbackRoute: typeof FeedbackRoute
-  InformationRoute: typeof InformationRoute
+  InformationRoute: typeof InformationRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AuthMicrosoftRoute: typeof AuthMicrosoftRouteWithChildren
@@ -238,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/information/$id': {
+      id: '/information/$id'
+      path: '/$id'
+      fullPath: '/information/$id'
+      preLoaderRoute: typeof InformationIdRouteImport
+      parentRoute: typeof InformationRoute
+    }
     '/auth/microsoft': {
       id: '/auth/microsoft'
       path: '/auth/microsoft'
@@ -281,6 +300,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface InformationRouteChildren {
+  InformationIdRoute: typeof InformationIdRoute
+}
+
+const InformationRouteChildren: InformationRouteChildren = {
+  InformationIdRoute: InformationIdRoute,
+}
+
+const InformationRouteWithChildren = InformationRoute._addFileChildren(
+  InformationRouteChildren,
+)
+
 interface AuthMicrosoftRouteChildren {
   AuthMicrosoftCallbackRoute: typeof AuthMicrosoftCallbackRoute
   AuthMicrosoftStartRoute: typeof AuthMicrosoftStartRoute
@@ -300,7 +331,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   FeedbackRoute: FeedbackRoute,
-  InformationRoute: InformationRoute,
+  InformationRoute: InformationRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AuthMicrosoftRoute: AuthMicrosoftRouteWithChildren,
