@@ -22,6 +22,10 @@ export type FeedbackStats = {
   averageScore: number | null;
   byCategory: { category: Category; count: number }[];
   byRating: { rating: (typeof RATING_LABELS)[number]; count: number }[];
+  byCategoryRating: {
+    category: "Academic Staff" | "Non-Academic Staff";
+    ratings: { rating: (typeof RATING_LABELS)[number]; count: number }[];
+  }[];
   byQuestion: {
     sortOrder: number;
     question: string;
@@ -61,6 +65,11 @@ type CountRow = RowDataPacket & { count: number };
 type AvgRow = RowDataPacket & { average_score: number | null };
 type CategoryRow = RowDataPacket & { category: Category; count: number };
 type RatingRow = RowDataPacket & {
+  rating: (typeof RATING_LABELS)[number];
+  count: number;
+};
+type CategoryRatingRow = RowDataPacket & {
+  category: "Academic Staff" | "Non-Academic Staff";
   rating: (typeof RATING_LABELS)[number];
   count: number;
 };
@@ -120,6 +129,10 @@ export async function getFeedbackStats(filter: FeedbackStatsFilter): Promise<Fee
       averageScore: null,
       byCategory: CATEGORIES.map((category) => ({ category, count: 0 })),
       byRating: RATING_LABELS.map((rating) => ({ rating, count: 0 })),
+      byCategoryRating: (["Academic Staff", "Non-Academic Staff"] as const).map((category) => ({
+        category,
+        ratings: RATING_LABELS.map((rating) => ({ rating, count: 0 })),
+      })),
       byQuestion: [],
       recentSuggestions: [],
     };
@@ -136,6 +149,7 @@ async function loadFeedbackStats(filter: FeedbackStatsFilter): Promise<FeedbackS
     avgRows,
     categoryRows,
     ratingRows,
+    categoryRatingRows,
     questionRows,
     suggestionRows,
   ] = await Promise.all([
@@ -169,6 +183,16 @@ async function loadFeedbackStats(filter: FeedbackStatsFilter): Promise<FeedbackS
         INNER JOIN feedback f ON f.id = fr.feedback_id
         WHERE ${feedbackDateWhere("f")}
         GROUP BY fr.rating
+      `,
+      dateParams,
+    ),
+    query<CategoryRatingRow[]>(
+      `
+        SELECT f.category, fr.rating, COUNT(*) AS count
+        FROM feedback_rating fr
+        INNER JOIN feedback f ON f.id = fr.feedback_id
+        WHERE ${feedbackDateWhere("f")} AND f.category IN ('Academic Staff', 'Non-Academic Staff')
+        GROUP BY f.category, fr.rating
       `,
       dateParams,
     ),
@@ -219,6 +243,20 @@ async function loadFeedbackStats(filter: FeedbackStatsFilter): Promise<FeedbackS
       rating,
       count: ratingMap.get(rating) ?? 0,
     })),
+    byCategoryRating: (["Academic Staff", "Non-Academic Staff"] as const).map((category) => {
+      const counts = new Map(
+        categoryRatingRows
+          .filter((row) => row.category === category)
+          .map((row) => [row.rating, Number(row.count)]),
+      );
+      return {
+        category,
+        ratings: RATING_LABELS.map((rating) => ({
+          rating,
+          count: counts.get(rating) ?? 0,
+        })),
+      };
+    }),
     byQuestion: questionRows.map((row) => ({
       sortOrder: Number(row.sort_order),
       question: row.question,

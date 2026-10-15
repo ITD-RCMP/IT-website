@@ -1,6 +1,46 @@
+import { RATING_LABELS } from "@/lib/feedback";
 import type { FeedbackStats } from "@/lib/feedback-api";
 
 const MARGIN = 48;
+const RATING_COLORS: Record<(typeof RATING_LABELS)[number], string> = {
+  "Not Satisfied": "#cfe8fa",
+  "Somewhat Satisfied": "#9ecbf0",
+  Neutral: "#5ea3e0",
+  Satisfied: "#2a7dc9",
+  "Very Satisfied": "#0a52a0",
+};
+
+function drawPieChart(
+  ratings: { rating: (typeof RATING_LABELS)[number]; count: number }[],
+  total: number,
+  size = 300,
+): string | null {
+  if (total <= 0) return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = size / 2 - 2;
+  let angle = -Math.PI / 2;
+
+  for (const item of ratings) {
+    if (item.count <= 0) continue;
+    const slice = (item.count / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, angle, angle + slice);
+    ctx.closePath();
+    ctx.fillStyle = RATING_COLORS[item.rating];
+    ctx.fill();
+    angle += slice;
+  }
+
+  return canvas.toDataURL("image/png");
+}
 const BLUE = "#0077C8";
 const NEUTRAL_900 = "#171717";
 const NEUTRAL_700 = "#404040";
@@ -251,59 +291,60 @@ export async function downloadFeedbackPdf(stats: FeedbackStats, year: number, mo
     rule();
     gap(28);
 
-    // Question averages — simple vertical bar chart on a 0-5 scale.
-    sectionTitle("Question averages", "Mean score from 1 (poor) to 5 (excellent)");
-    if (stats.byQuestion.length === 0) {
-      body("No question scores for this period.", 11, NEUTRAL_600);
+    // Respond average — rating-mix pie charts for Academic Staff and Non-Academic Staff.
+    const pieHasData = stats.byCategoryRating.some((group) =>
+      group.ratings.some((item) => item.count > 0),
+    );
+    const pieSize = 150;
+    const legendHeight = RATING_LABELS.length * 16 + 10;
+    ensure(44 + (pieHasData ? 34 + pieSize + 16 + legendHeight : 20));
+    sectionTitle("Respond Average", "Fraction of ratings by Academic Staff & Non-Academic Staff");
+    if (!pieHasData) {
+      body("No responses from Academic or Non-Academic Staff for this period.", 11, NEUTRAL_600);
     } else {
-      const chartHeight = 130;
-      const chartWidth = contentWidth;
-      ensure(chartHeight + 30);
-      const chartTop = y;
-      const chartBottom = chartTop + chartHeight;
-      doc.setDrawColor(NEUTRAL_200);
-      doc.line(MARGIN, chartBottom, MARGIN + chartWidth, chartBottom);
+      gap(14);
+      const pieColWidth = (contentWidth - 32) / 2;
+      const pieColX = [MARGIN, MARGIN + pieColWidth + 32];
+      const sectionTop = y;
 
-      const barGap = 14;
-      const barWidth = Math.min(
-        40,
-        (chartWidth - barGap * (stats.byQuestion.length - 1)) / stats.byQuestion.length,
-      );
-      const totalBarsWidth =
-        barWidth * stats.byQuestion.length + barGap * (stats.byQuestion.length - 1);
-      let barX = MARGIN + (chartWidth - totalBarsWidth) / 2;
-
-      for (const item of stats.byQuestion) {
-        const score = item.averageScore ?? 0;
-        const barHeight = (score / 5) * chartHeight;
-        doc.setFillColor(BLUE);
-        doc.roundedRect(barX, chartBottom - barHeight, barWidth, barHeight, 4, 4, "F");
+      stats.byCategoryRating.forEach((group, index) => {
+        const colX = pieColX[index];
+        let colY = sectionTop;
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(9);
-        doc.setTextColor(NEUTRAL_500);
-        doc.text(`Q${item.sortOrder}`, barX + barWidth / 2, chartBottom + 14, { align: "center" });
-        barX += barWidth + barGap;
-      }
-      y = chartBottom + 28;
-
-      for (const item of stats.byQuestion) {
-        const score = item.averageScore == null ? "—" : `${item.averageScore.toFixed(2)} / 5`;
-        ensure(32);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(10);
+        doc.setFontSize(11);
         doc.setTextColor(NEUTRAL_900);
-        doc.text(`Q${item.sortOrder}.`, MARGIN, y);
-        const prefixWidth = doc.getTextWidth(`Q${item.sortOrder}. `);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(NEUTRAL_700);
-        const lines = doc.splitTextToSize(item.question, contentWidth - prefixWidth) as string[];
-        doc.text(lines, MARGIN + prefixWidth, y);
-        y += lines.length * 13;
-        doc.setFontSize(9);
-        doc.setTextColor(NEUTRAL_500);
-        doc.text(`${score} · ${item.responses} responses`, MARGIN, y);
-        y += 18;
-      }
+        doc.text(group.category, colX, colY);
+        colY += 20;
+
+        const total = group.ratings.reduce((sum, item) => sum + item.count, 0);
+        const pieX = colX + (pieColWidth - pieSize) / 2;
+        const pieDataUrl = drawPieChart(group.ratings, total);
+        if (pieDataUrl) {
+          doc.addImage(pieDataUrl, "PNG", pieX, colY, pieSize, pieSize);
+        } else {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.setTextColor(NEUTRAL_500);
+          doc.text("No responses yet.", colX, colY + pieSize / 2);
+        }
+        colY += pieSize + 16;
+
+        for (const item of group.ratings) {
+          const percentText = total > 0 ? `${((item.count / total) * 100).toFixed(1)}%` : "—";
+          const color = RATING_COLORS[item.rating];
+          doc.setFillColor(color);
+          doc.rect(colX, colY - 8, 9, 9, "F");
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9.5);
+          doc.setTextColor(NEUTRAL_700);
+          doc.text(item.rating, colX + 14, colY);
+          doc.setTextColor(NEUTRAL_500);
+          doc.text(percentText, colX + pieColWidth, colY, { align: "right" });
+          colY += 16;
+        }
+      });
+
+      y = sectionTop + 20 + pieSize + 16 + legendHeight;
     }
     gap(12);
     rule();
