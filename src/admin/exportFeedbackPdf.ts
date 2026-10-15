@@ -85,7 +85,7 @@ async function loadLogo(): Promise<string> {
 
 export async function downloadFeedbackPdf(stats: FeedbackStats, year: number, month: number) {
   const { jsPDF } = await import("jspdf");
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "landscape" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const contentWidth = pageWidth - MARGIN * 2;
@@ -350,26 +350,53 @@ export async function downloadFeedbackPdf(stats: FeedbackStats, year: number, mo
     rule();
     gap(28);
 
-    // Recent suggestions list, mirroring the border-top divided list on the dashboard.
+    // Recent suggestions, laid out two-up to use the landscape width.
     sectionTitle("Recent suggestions", "Comments from this period");
     if (stats.recentSuggestions.length === 0) {
       body("No suggestions for this period.", 11, NEUTRAL_600);
     } else {
-      for (const item of stats.recentSuggestions) {
-        ensure(40);
-        rule();
-        gap(14);
+      const sugColGap = 32;
+      const sugColWidth = (contentWidth - sugColGap) / 2;
+      const sugColX = [MARGIN, MARGIN + sugColWidth + sugColGap];
+
+      const measureSuggestion = (item: (typeof stats.recentSuggestions)[number]) => {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10.5);
+        const lines = doc.splitTextToSize(item.suggestion, sugColWidth) as string[];
+        return 14 + lines.length * 15 + 4;
+      };
+
+      const drawSuggestion = (item: (typeof stats.recentSuggestions)[number], x: number) => {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
         doc.setTextColor(NEUTRAL_700);
-        doc.text(item.category, MARGIN, y);
+        doc.text(item.category, x, y);
         const catWidth = doc.getTextWidth(item.category);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(NEUTRAL_500);
-        doc.text(formatDate(item.createdAt), MARGIN + catWidth + 10, y);
+        doc.text(formatDate(item.createdAt), x + catWidth + 10, y);
         y += 14;
-        body(item.suggestion, 10.5, "#1f1f1f");
-        gap(4);
+        body(item.suggestion, 10.5, "#1f1f1f", x, sugColWidth);
+      };
+
+      for (let i = 0; i < stats.recentSuggestions.length; i += 2) {
+        const left = stats.recentSuggestions[i];
+        const right = stats.recentSuggestions[i + 1];
+        const rowHeight = Math.max(
+          measureSuggestion(left),
+          right ? measureSuggestion(right) : 0,
+        );
+        ensure(rowHeight + 2);
+        rule();
+        gap(14);
+        const rowTop = y;
+        drawSuggestion(left, sugColX[0]);
+        const leftBottom = y;
+        if (right) {
+          y = rowTop;
+          drawSuggestion(right, sugColX[1]);
+        }
+        y = Math.max(leftBottom, y) + 4;
       }
     }
   }
