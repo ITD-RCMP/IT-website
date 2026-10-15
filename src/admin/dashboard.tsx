@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { downloadFeedbackPdf } from "@/admin/exportFeedbackPdf";
 import { logoutUser } from "@/lib/auth";
-import { RATING_LABELS } from "@/lib/feedback";
+import { RATING_COLORS, RATING_LABELS } from "@/lib/feedback";
 import type { FeedbackStats } from "@/lib/feedback-api";
 
 const MONTHS = [
@@ -57,23 +57,36 @@ function ScoreBar({ label, value, max }: { label: string; value: number; max: nu
         <p className="text-sm tabular-nums text-neutral-500">{value}</p>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
-        <div className="h-full rounded-full bg-[#0077C8] transition-all" style={{ width: `${width}%` }} />
+        <div className="h-full rounded-full bg-neutral-400 transition-all" style={{ width: `${width}%` }} />
       </div>
     </div>
   );
 }
 
-function PercentBar({ label, value, total }: { label: string; value: number; total: number }) {
+function PercentBar({
+  label,
+  value,
+  total,
+  color = "#0077C8",
+}: {
+  label: string;
+  value: number;
+  total: number;
+  color?: string;
+}) {
   const percent = total > 0 ? (value / total) * 100 : 0;
   const width = percent > 0 ? Math.max(percent, 4) : 0;
   return (
     <div className="space-y-2">
-      <div className="flex items-baseline justify-between gap-3">
-        <p className="text-sm text-neutral-700">{label}</p>
-        <p className="text-sm tabular-nums text-neutral-500">{percent.toFixed(1)}%</p>
+      <div className="flex items-center gap-2">
+        <span aria-hidden="true" className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+        <div className="flex flex-1 items-baseline justify-between gap-3">
+          <p className="text-sm text-neutral-700">{label}</p>
+          <p className="text-sm tabular-nums text-neutral-500">{percent.toFixed(1)}%</p>
+        </div>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
-        <div className="h-full rounded-full bg-[#0077C8] transition-all" style={{ width: `${width}%` }} />
+        <div className="h-full rounded-full transition-all" style={{ width: `${width}%`, backgroundColor: color }} />
       </div>
     </div>
   );
@@ -278,6 +291,7 @@ export default function AdminDashboard() {
                         label={item.rating}
                         value={item.count}
                         total={ratingTotal}
+                        color={RATING_COLORS[item.rating]}
                       />
                     ))}
                   </div>

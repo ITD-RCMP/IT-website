@@ -1,14 +1,7 @@
-import { RATING_LABELS } from "@/lib/feedback";
+import { RATING_COLORS, RATING_LABELS } from "@/lib/feedback";
 import type { FeedbackStats } from "@/lib/feedback-api";
 
 const MARGIN = 48;
-const RATING_COLORS: Record<(typeof RATING_LABELS)[number], string> = {
-  "Not Satisfied": "#cfe8fa",
-  "Somewhat Satisfied": "#9ecbf0",
-  Neutral: "#5ea3e0",
-  Satisfied: "#2a7dc9",
-  "Very Satisfied": "#0a52a0",
-};
 
 function drawPieChart(
   ratings: { rating: (typeof RATING_LABELS)[number]; count: number }[],
@@ -46,6 +39,7 @@ const NEUTRAL_900 = "#171717";
 const NEUTRAL_700 = "#404040";
 const NEUTRAL_600 = "#525252";
 const NEUTRAL_500 = "#737373";
+const NEUTRAL_400 = "#a3a3a3";
 const NEUTRAL_200 = "#e5e5e5";
 const NEUTRAL_100 = "#f5f5f5";
 
@@ -160,6 +154,7 @@ export async function downloadFeedbackPdf(stats: FeedbackStats, year: number, mo
     labelText: string,
     valueText: string,
     percent: number,
+    color: string = BLUE,
   ) => {
     const rowHeight = 30;
     ensure(rowHeight);
@@ -175,7 +170,7 @@ export async function downloadFeedbackPdf(stats: FeedbackStats, year: number, mo
     doc.roundedRect(barX, y, barWidth, trackHeight, trackHeight / 2, trackHeight / 2, "F");
     const filled = Math.max((percent / 100) * barWidth, percent > 0 ? 6 : 0);
     if (filled > 0) {
-      doc.setFillColor(BLUE);
+      doc.setFillColor(color);
       doc.roundedRect(barX, y, filled, trackHeight, trackHeight / 2, trackHeight / 2, "F");
     }
     y += trackHeight + 14;
@@ -275,14 +270,14 @@ export async function downloadFeedbackPdf(stats: FeedbackStats, year: number, mo
     y = barsTop;
     for (const item of stats.byCategory) {
       const percent = (item.count / categoryMax) * 100;
-      statBar(colX1, colWidth, item.category, String(item.count), percent);
+      statBar(colX1, colWidth, item.category, String(item.count), percent, NEUTRAL_400);
     }
     const categoryBottom = y;
 
     y = barsTop;
     for (const item of stats.byRating) {
       const percent = ratingTotal > 0 ? (item.count / ratingTotal) * 100 : 0;
-      statBar(colX2, colWidth, item.rating, `${percent.toFixed(1)}%`, percent);
+      statBar(colX2, colWidth, item.rating, `${percent.toFixed(1)}%`, percent, RATING_COLORS[item.rating]);
     }
     const ratingBottom = y;
 

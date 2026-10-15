@@ -8,6 +8,20 @@ export const RATING_LABELS = [
   "Very Satisfied",
 ] as const;
 
+// Traffic-light scale (red -> yellow -> green): ratings run from negative to
+// positive, so color reads as a familiar "bad to good" gradient. Each hex clears
+// 3:1 contrast against a white surface and adjacent steps are pushed as far apart
+// in OKLab as the hue path allows; red/yellow/green is still not colorblind-safe,
+// so every slice also carries a text label (legend/axis) and is never identified
+// by color alone.
+export const RATING_COLORS: Record<(typeof RATING_LABELS)[number], string> = {
+  "Not Satisfied": "#802d2d",
+  "Somewhat Satisfied": "#b35127",
+  Neutral: "#b38a1b",
+  Satisfied: "#439445",
+  "Very Satisfied": "#266619",
+};
+
 export const QUESTIONS = [
   "The IT facilities provided are sufficient to support my academic or work-related activities.",
   "The condition and availability of IT facilities meet my needs.",
