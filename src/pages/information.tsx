@@ -312,7 +312,8 @@ export default function Information() {
               {RESOURCES.map((item) => (
                 <Link
                   key={item.id}
-                  to={`/information/${item.id}`}
+                  to="/information/$id"
+                  params={{ id: item.id }}
                   className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all hover:border-[#0077C8] hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0077C8]"
                 >
                   {item.image ? (

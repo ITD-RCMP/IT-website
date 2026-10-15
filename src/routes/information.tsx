@@ -1,5 +1,5 @@
 import React from "react";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import Information from "../pages/information";
 import { createSeoHead, webPageJsonLd } from "@/lib/seo";
 
@@ -8,10 +8,10 @@ const description =
   "Guides and resources from the RCMP IT Department, including the new student login guide, wireless microphone usage, and department introductions.";
 
 function InformationLayout() {
-  const location = typeof window !== "undefined" ? window.location.pathname : "";
+  const location = useLocation();
 
   // If the current path is just /information, show the listing
-  if (location === "/information" || location === "/information/") {
+  if (location.pathname === "/information" || location.pathname === "/information/") {
     return <Information />;
   }
 
