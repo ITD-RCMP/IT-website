@@ -187,6 +187,20 @@ export default function AdminDashboard() {
             <p className="max-w-2xl text-base leading-7 text-neutral-600">
               Statistics for {formatPeriod(year, month)}.
             </p>
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <Link
+                to="/admin/manage-information"
+                className="inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-50"
+              >
+                Manage information
+              </Link>
+              <Link
+                to="/admin/manage-system-versions"
+                className="inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-50"
+              >
+                Manage system versions
+              </Link>
+            </div>
             <div className="flex flex-wrap items-end gap-3 pt-2">
               <label className="space-y-1.5">
                 <span className="block text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">

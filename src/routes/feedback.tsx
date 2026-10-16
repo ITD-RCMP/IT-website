@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import FeedbackForm from "../pages/FeedbackForm";
-import { listFeedbackQuestions } from "@/lib/feedback-api";
+import { listActiveFeedbackQuestions } from "@/lib/feedback-api";
 import { createSeoHead, webPageJsonLd } from "@/lib/seo";
 
 const title = "Feedback";
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/feedback")({
     }),
   loader: async () => {
     try {
-      const questions = await listFeedbackQuestions();
+      const questions = await listActiveFeedbackQuestions();
       return { questions };
     } catch (error) {
       console.error("Failed to load feedback questions:", error);

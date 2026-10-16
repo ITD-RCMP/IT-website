@@ -52,6 +52,7 @@ export type FeedbackQuestion = {
   id: number;
   sortOrder: number;
   question: string;
+  isActive: boolean;
   responseCount: number;
 };
 
@@ -59,6 +60,7 @@ type FeedbackQuestionRow = RowDataPacket & {
   id: number;
   sort_order: number;
   question: string;
+  is_active: number;
   response_count: number;
 };
 type CountRow = RowDataPacket & { count: number };
@@ -283,10 +285,11 @@ export async function listFeedbackQuestions(): Promise<FeedbackQuestion[]> {
         fq.id,
         fq.sort_order,
         fq.question,
+        fq.is_active,
         COUNT(fr.id) AS response_count
       FROM feedback_question fq
       LEFT JOIN feedback_rating fr ON fr.question_id = fq.id
-      GROUP BY fq.id, fq.sort_order, fq.question
+      GROUP BY fq.id, fq.sort_order, fq.question, fq.is_active
       ORDER BY fq.sort_order ASC
     `);
 
@@ -294,11 +297,77 @@ export async function listFeedbackQuestions(): Promise<FeedbackQuestion[]> {
       id: Number(row.id),
       sortOrder: Number(row.sort_order),
       question: row.question,
+      isActive: Boolean(row.is_active),
       responseCount: Number(row.response_count),
     }));
   } catch (error) {
     console.error("listFeedbackQuestions failed:", error);
     return [];
+  }
+}
+
+export async function listActiveFeedbackQuestions(): Promise<FeedbackQuestion[]> {
+  const questions = await listFeedbackQuestions();
+  return questions.filter((question) => question.isActive);
+}
+
+export async function setFeedbackQuestionActive(
+  id: number,
+  isActive: boolean,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const [result] = await getDb().execute<ResultSetHeader>(
+      "UPDATE feedback_question SET is_active = ? WHERE id = ?",
+      [isActive ? 1 : 0, id],
+    );
+
+    if (result.affectedRows === 0) {
+      return { ok: false, error: "Question not found." };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    console.error("setFeedbackQuestionActive failed:", error);
+    return { ok: false, error: "Unable to update question." };
+  }
+}
+
+export async function reorderFeedbackQuestions(
+  orderedIds: number[],
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (orderedIds.length === 0) {
+    return { ok: false, error: "No questions to reorder." };
+  }
+
+  const db = getDb();
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // sort_order is uniquely constrained, so push everything to negative
+    // placeholders first to avoid collisions while reassigning final values.
+    for (const [index, id] of orderedIds.entries()) {
+      await connection.execute(
+        "UPDATE feedback_question SET sort_order = ? WHERE id = ?",
+        [-(index + 1), id],
+      );
+    }
+    for (const [index, id] of orderedIds.entries()) {
+      await connection.execute(
+        "UPDATE feedback_question SET sort_order = ? WHERE id = ?",
+        [index + 1, id],
+      );
+    }
+
+    await connection.commit();
+    return { ok: true };
+  } catch (error) {
+    await connection.rollback();
+    console.error("reorderFeedbackQuestions failed:", error);
+    return { ok: false, error: "Unable to reorder questions." };
+  } finally {
+    connection.release();
   }
 }
 
@@ -449,7 +518,7 @@ export async function submitFeedback(input: {
   }
 
   const questions = await query<QuestionIdRow[]>(
-    "SELECT id, sort_order FROM feedback_question ORDER BY sort_order ASC",
+    "SELECT id, sort_order FROM feedback_question WHERE is_active = 1 ORDER BY sort_order ASC",
   );
 
   if (questions.length === 0) {

@@ -4,8 +4,11 @@ import {
   createFeedbackQuestion as createFeedbackQuestionRecord,
   deleteFeedbackQuestion as deleteFeedbackQuestionRecord,
   getFeedbackStats as loadFeedbackStats,
+  listActiveFeedbackQuestions as loadActiveFeedbackQuestions,
   listFeedbackEntries as loadFeedbackEntries,
   listFeedbackQuestions as loadFeedbackQuestions,
+  reorderFeedbackQuestions as reorderFeedbackQuestionsRecord,
+  setFeedbackQuestionActive as setFeedbackQuestionActiveRecord,
   submitFeedback as saveFeedback,
   updateFeedbackQuestion as updateFeedbackQuestionRecord,
   type FeedbackStats,
@@ -30,6 +33,23 @@ export const listFeedbackEntries = createServerFn({ method: "GET" }).handler(asy
 export const listFeedbackQuestions = createServerFn({ method: "GET" }).handler(async () =>
   loadFeedbackQuestions(),
 );
+
+export const listActiveFeedbackQuestions = createServerFn({ method: "GET" }).handler(async () =>
+  loadActiveFeedbackQuestions(),
+);
+
+export const setFeedbackQuestionActive = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      id: z.number().int().positive(),
+      isActive: z.boolean(),
+    }),
+  )
+  .handler(async ({ data }) => setFeedbackQuestionActiveRecord(data.id, data.isActive));
+
+export const reorderFeedbackQuestions = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ orderedIds: z.array(z.number().int().positive()).min(1) }))
+  .handler(async ({ data }) => reorderFeedbackQuestionsRecord(data.orderedIds));
 
 export const createFeedbackQuestion = createServerFn({ method: "POST" })
   .inputValidator(

@@ -1,11 +1,13 @@
 import React from "react";
 import { Link, useLoaderData, useNavigate, useRouteContext, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
 import { logoutUser } from "@/lib/auth";
 import {
   createFeedbackQuestion,
   deleteFeedbackQuestion,
+  reorderFeedbackQuestions,
+  setFeedbackQuestionActive,
   updateFeedbackQuestion,
   type FeedbackQuestion,
 } from "@/lib/feedback-api";
@@ -26,6 +28,8 @@ export default function ManageFeedback() {
   const createQuestion = useServerFn(createFeedbackQuestion);
   const saveQuestion = useServerFn(updateFeedbackQuestion);
   const removeQuestion = useServerFn(deleteFeedbackQuestion);
+  const toggleQuestionActive = useServerFn(setFeedbackQuestionActive);
+  const reorderQuestions = useServerFn(reorderFeedbackQuestions);
 
   const [questions, setQuestions] = React.useState(loadedQuestions);
   const [busy, setBusy] = React.useState(false);
@@ -154,6 +158,62 @@ export default function ManageFeedback() {
     }
   };
 
+  const handleToggleActive = async (item: FeedbackQuestion) => {
+    setError("");
+    setActionBusy(true);
+
+    try {
+      const result = await toggleQuestionActive({
+        data: { id: item.id, isActive: !item.isActive },
+      });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+
+      setQuestions((current) =>
+        current.map((question) =>
+          question.id === item.id ? { ...question, isActive: !item.isActive } : question,
+        ),
+      );
+      await refresh();
+    } catch {
+      setError("Unable to update question.");
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
+  const handleMove = async (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= questions.length) return;
+
+    const reordered = [...questions];
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
+
+    setError("");
+    setActionBusy(true);
+    setQuestions(reordered);
+
+    try {
+      const result = await reorderQuestions({
+        data: { orderedIds: reordered.map((question) => question.id) },
+      });
+      if (!result.ok) {
+        setError(result.error);
+        setQuestions(questions);
+        return;
+      }
+
+      await refresh();
+    } catch {
+      setError("Unable to reorder questions.");
+      setQuestions(questions);
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-white text-neutral-900">
       <div
@@ -255,11 +315,14 @@ export default function ManageFeedback() {
             </div>
           ) : (
             <ul className="space-y-4 animate-[manageIn_0.6s_ease-out_0.1s_both]">
-              {questions.map((item) => {
+              {questions.map((item, index) => {
                 const isEditing = editingId === item.id;
                 const isPendingDelete = pendingDeleteId === item.id;
                 return (
-                  <li key={item.id} className="border-t border-neutral-200 pt-4">
+                  <li
+                    key={item.id}
+                    className={`border-t border-neutral-200 pt-4 ${item.isActive ? "" : "opacity-50"}`}
+                  >
                     {isEditing ? (
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-3">
@@ -335,10 +398,37 @@ export default function ManageFeedback() {
                       </div>
                     ) : (
                       <div className="flex gap-4">
+                        <div className="flex shrink-0 flex-col items-center gap-0.5 pt-0.5">
+                          <button
+                            type="button"
+                            onClick={() => handleMove(index, -1)}
+                            disabled={actionBusy || index === 0}
+                            aria-label={`Move question ${item.sortOrder} up`}
+                            className="rounded-full p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-30"
+                          >
+                            <ChevronUp className="h-4 w-4" strokeWidth={1.75} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMove(index, 1)}
+                            disabled={actionBusy || index === questions.length - 1}
+                            aria-label={`Move question ${item.sortOrder} down`}
+                            className="rounded-full p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-30"
+                          >
+                            <ChevronDown className="h-4 w-4" strokeWidth={1.75} />
+                          </button>
+                        </div>
                         <div className="min-w-0 flex-1 space-y-2">
-                          <p className="font-mono text-xs font-medium text-[#0077C8] tabular-nums">
-                            Q{String(item.sortOrder).padStart(2, "0")}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-mono text-xs font-medium text-[#0077C8] tabular-nums">
+                              Q{String(item.sortOrder).padStart(2, "0")}
+                            </p>
+                            {!item.isActive ? (
+                              <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+                                Disabled
+                              </span>
+                            ) : null}
+                          </div>
                           <p className="text-sm leading-6 text-neutral-800">{item.question}</p>
                           {item.responseCount > 0 ? (
                             <p className="text-xs text-neutral-500">
@@ -347,6 +437,23 @@ export default function ManageFeedback() {
                           ) : null}
                         </div>
                         <div className="flex shrink-0 items-start gap-1">
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={item.isActive}
+                            onClick={() => handleToggleActive(item)}
+                            disabled={actionBusy}
+                            aria-label={item.isActive ? `Disable question ${item.sortOrder}` : `Enable question ${item.sortOrder}`}
+                            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition disabled:opacity-50 ${
+                              item.isActive ? "bg-[#0077C8]" : "bg-neutral-300"
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
+                                item.isActive ? "translate-x-6" : "translate-x-1"
+                              }`}
+                            />
+                          </button>
                           <button
                             type="button"
                             onClick={() => startEdit(item)}

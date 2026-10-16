@@ -19,6 +19,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as InformationIdRouteImport } from './routes/information.$id'
 import { Route as AuthMicrosoftRouteImport } from './routes/auth.microsoft'
+import { Route as AdminManageSystemVersionsRouteImport } from './routes/admin.manage-system-versions'
+import { Route as AdminManageInformationRouteImport } from './routes/admin.manage-information'
 import { Route as AdminManageFeedbackRouteImport } from './routes/admin.manage-feedback'
 import { Route as AuthMicrosoftStartRouteImport } from './routes/auth.microsoft.start'
 import { Route as AuthMicrosoftCallbackRouteImport } from './routes/auth.microsoft.callback'
@@ -73,6 +75,17 @@ const AuthMicrosoftRoute = AuthMicrosoftRouteImport.update({
   path: '/auth/microsoft',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminManageSystemVersionsRoute =
+  AdminManageSystemVersionsRouteImport.update({
+    id: '/manage-system-versions',
+    path: '/manage-system-versions',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminManageInformationRoute = AdminManageInformationRouteImport.update({
+  id: '/manage-information',
+  path: '/manage-information',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminManageFeedbackRoute = AdminManageFeedbackRouteImport.update({
   id: '/manage-feedback',
   path: '/manage-feedback',
@@ -98,6 +111,8 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/manage-feedback': typeof AdminManageFeedbackRoute
+  '/admin/manage-information': typeof AdminManageInformationRoute
+  '/admin/manage-system-versions': typeof AdminManageSystemVersionsRoute
   '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
   '/information/$id': typeof InformationIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -112,6 +127,8 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/manage-feedback': typeof AdminManageFeedbackRoute
+  '/admin/manage-information': typeof AdminManageInformationRoute
+  '/admin/manage-system-versions': typeof AdminManageSystemVersionsRoute
   '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
   '/information/$id': typeof InformationIdRoute
   '/admin': typeof AdminIndexRoute
@@ -128,6 +145,8 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/manage-feedback': typeof AdminManageFeedbackRoute
+  '/admin/manage-information': typeof AdminManageInformationRoute
+  '/admin/manage-system-versions': typeof AdminManageSystemVersionsRoute
   '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
   '/information/$id': typeof InformationIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -145,6 +164,8 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/manage-feedback'
+    | '/admin/manage-information'
+    | '/admin/manage-system-versions'
     | '/auth/microsoft'
     | '/information/$id'
     | '/admin/'
@@ -159,6 +180,8 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/manage-feedback'
+    | '/admin/manage-information'
+    | '/admin/manage-system-versions'
     | '/auth/microsoft'
     | '/information/$id'
     | '/admin'
@@ -174,6 +197,8 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/manage-feedback'
+    | '/admin/manage-information'
+    | '/admin/manage-system-versions'
     | '/auth/microsoft'
     | '/information/$id'
     | '/admin/'
@@ -264,6 +289,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMicrosoftRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/manage-system-versions': {
+      id: '/admin/manage-system-versions'
+      path: '/manage-system-versions'
+      fullPath: '/admin/manage-system-versions'
+      preLoaderRoute: typeof AdminManageSystemVersionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/manage-information': {
+      id: '/admin/manage-information'
+      path: '/manage-information'
+      fullPath: '/admin/manage-information'
+      preLoaderRoute: typeof AdminManageInformationRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/manage-feedback': {
       id: '/admin/manage-feedback'
       path: '/manage-feedback'
@@ -290,11 +329,15 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminManageFeedbackRoute: typeof AdminManageFeedbackRoute
+  AdminManageInformationRoute: typeof AdminManageInformationRoute
+  AdminManageSystemVersionsRoute: typeof AdminManageSystemVersionsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminManageFeedbackRoute: AdminManageFeedbackRoute,
+  AdminManageInformationRoute: AdminManageInformationRoute,
+  AdminManageSystemVersionsRoute: AdminManageSystemVersionsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

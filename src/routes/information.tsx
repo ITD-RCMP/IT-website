@@ -1,6 +1,8 @@
 import React from "react";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import Information from "../pages/information";
+import { listInformationContent } from "@/lib/information-api";
+import { listSystemVersions } from "@/lib/systemVersion-api";
 import { createSeoHead, webPageJsonLd } from "@/lib/seo";
 
 const title = "Information";
@@ -27,6 +29,18 @@ export const Route = createFileRoute("/information")({
       path: "/information",
       jsonLd: webPageJsonLd({ title, description, path: "/information" }),
     }),
+  loader: async () => {
+    try {
+      const [items, versions] = await Promise.all([
+        listInformationContent(),
+        listSystemVersions(),
+      ]);
+      return { items, versions };
+    } catch (error) {
+      console.error("Failed to load information content:", error);
+      return { items: [], versions: [] };
+    }
+  },
   component: InformationLayout,
 });
 
