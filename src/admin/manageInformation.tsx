@@ -10,6 +10,7 @@ import {
   reorderInformationContent,
   updateInformationContent,
   uploadInformationImage,
+  uploadInformationVideo,
   type InformationContent,
 } from "@/lib/information-api";
 
@@ -46,6 +47,7 @@ export default function ManageInformation() {
   const removeContent = useServerFn(deleteInformationContent);
   const reorderContent = useServerFn(reorderInformationContent);
   const uploadImage = useServerFn(uploadInformationImage);
+  const uploadVideo = useServerFn(uploadInformationVideo);
 
   const [items, setItems] = React.useState(loadedItems);
   const [busy, setBusy] = React.useState(false);
@@ -78,19 +80,22 @@ export default function ManageInformation() {
     }
   };
 
-  const handleImageUpload = async (file: File, setForm: React.Dispatch<React.SetStateAction<FormState>>) => {
+  const handleFileUpload = async (file: File, setForm: React.Dispatch<React.SetStateAction<FormState>>) => {
     setError("");
     setUploading(true);
     try {
       const base64Data = await fileToBase64(file);
-      const result = await uploadImage({ data: { base64Data, contentType: file.type } });
+      const isVideo = file.type === "video/mp4";
+      const result = isVideo
+        ? await uploadVideo({ data: { base64Data, contentType: file.type } })
+        : await uploadImage({ data: { base64Data, contentType: file.type } });
       if (!result.ok) {
         setError(result.error);
         return;
       }
       setForm((prev) => ({ ...prev, imagePath: result.path }));
     } catch {
-      setError("Unable to upload image.");
+      setError("Unable to upload file.");
     } finally {
       setUploading(false);
     }
@@ -270,26 +275,35 @@ export default function ManageInformation() {
 
             <div className="space-y-1.5">
               <span className="block text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">
-                Picture
+                Picture or video
               </span>
               <input
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
+                accept="image/jpeg,image/png,image/webp,image/gif,video/mp4"
                 disabled={uploading}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) void handleImageUpload(file, setNewForm);
+                  if (file) void handleFileUpload(file, setNewForm);
                   e.target.value = "";
                 }}
                 className="block w-full text-sm text-neutral-600 file:mr-4 file:rounded-full file:border-0 file:bg-neutral-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-neutral-900 hover:file:bg-neutral-200"
               />
+              <p className="text-xs text-neutral-400">Images up to 5 MB · MP4 videos up to 100 MB</p>
               {uploading ? <p className="text-xs text-neutral-500">Uploading…</p> : null}
               {newForm.imagePath ? (
-                <img
-                  src={newForm.imagePath}
-                  alt="Upload preview"
-                  className="mt-2 h-32 w-auto rounded-lg border border-neutral-200 object-contain"
-                />
+                newForm.imagePath.endsWith(".mp4") ? (
+                  <video
+                    src={newForm.imagePath}
+                    controls
+                    className="mt-2 h-32 w-auto rounded-lg border border-neutral-200"
+                  />
+                ) : (
+                  <img
+                    src={newForm.imagePath}
+                    alt="Upload preview"
+                    className="mt-2 h-32 w-auto rounded-lg border border-neutral-200 object-contain"
+                  />
+                )
               ) : null}
             </div>
 
@@ -334,21 +348,31 @@ export default function ManageInformation() {
                         <div className="space-y-1.5">
                           <input
                             type="file"
-                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            accept="image/jpeg,image/png,image/webp,image/gif,video/mp4"
                             disabled={uploading}
                             onChange={(e) => {
                               const file = e.target.files?.[0];
-                              if (file) void handleImageUpload(file, setEditForm);
+                              if (file) void handleFileUpload(file, setEditForm);
                               e.target.value = "";
                             }}
                             className="block w-full text-sm text-neutral-600 file:mr-4 file:rounded-full file:border-0 file:bg-neutral-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-neutral-900 hover:file:bg-neutral-200"
                           />
+                          <p className="text-xs text-neutral-400">Images up to 5 MB · MP4 videos up to 100 MB</p>
+                          {uploading ? <p className="text-xs text-neutral-500">Uploading…</p> : null}
                           {editForm.imagePath ? (
-                            <img
-                              src={editForm.imagePath}
-                              alt="Upload preview"
-                              className="mt-2 h-32 w-auto rounded-lg border border-neutral-200 object-contain"
-                            />
+                            editForm.imagePath.endsWith(".mp4") ? (
+                              <video
+                                src={editForm.imagePath}
+                                controls
+                                className="mt-2 h-32 w-auto rounded-lg border border-neutral-200"
+                              />
+                            ) : (
+                              <img
+                                src={editForm.imagePath}
+                                alt="Upload preview"
+                                className="mt-2 h-32 w-auto rounded-lg border border-neutral-200 object-contain"
+                              />
+                            )
                           ) : null}
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -419,11 +443,18 @@ export default function ManageInformation() {
                         </div>
 
                         {item.imagePath ? (
-                          <img
-                            src={item.imagePath}
-                            alt={item.title}
-                            className="h-20 w-20 shrink-0 rounded-lg border border-neutral-200 object-cover"
-                          />
+                          item.imagePath.endsWith(".mp4") ? (
+                            <video
+                              src={item.imagePath}
+                              className="h-20 w-20 shrink-0 rounded-lg border border-neutral-200 object-cover"
+                            />
+                          ) : (
+                            <img
+                              src={item.imagePath}
+                              alt={item.title}
+                              className="h-20 w-20 shrink-0 rounded-lg border border-neutral-200 object-cover"
+                            />
+                          )
                         ) : (
                           <div className="h-20 w-20 shrink-0 rounded-lg bg-gradient-to-br from-[#0077C8]/10 to-[#0077C8]/5" />
                         )}

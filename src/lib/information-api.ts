@@ -7,6 +7,7 @@ import {
   listInformationContent as loadInformationContent,
   reorderInformationContent as reorderInformationContentRecord,
   saveUploadedImage as saveUploadedImageRecord,
+  saveUploadedVideo as saveUploadedVideoRecord,
   updateInformationContent as updateInformationContentRecord,
 } from "@/lib/information.server";
 
@@ -58,3 +59,12 @@ export const uploadInformationImage = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => saveUploadedImageRecord(data));
+
+export const uploadInformationVideo = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      base64Data: z.string().min(1),
+      contentType: z.string().min(1),
+    }),
+  )
+  .handler(async ({ data }) => saveUploadedVideoRecord(data));

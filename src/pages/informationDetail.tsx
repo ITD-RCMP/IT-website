@@ -126,16 +126,26 @@ export default function InformationDetail() {
 
             {item.imagePath ? (
               <figure className="mt-10">
-                <a href={item.imagePath} target="_blank" rel="noopener noreferrer" className="block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0077C8]">
-                  <img
+                {item.imagePath.endsWith(".mp4") ? (
+                  <video
                     src={item.imagePath}
-                    alt={item.title}
-                    className="block max-h-[70vh] w-full rounded-2xl border border-neutral-200 object-contain object-top"
+                    controls
+                    className="block max-h-[70vh] w-full rounded-2xl border border-neutral-200 object-contain"
                   />
-                </a>
-                <figcaption className="mt-3 text-xs text-neutral-500">
-                  Open the image to view it full size.
-                </figcaption>
+                ) : (
+                  <a href={item.imagePath} target="_blank" rel="noopener noreferrer" className="block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0077C8]">
+                    <img
+                      src={item.imagePath}
+                      alt={item.title}
+                      className="block max-h-[70vh] w-full rounded-2xl border border-neutral-200 object-contain object-top"
+                    />
+                  </a>
+                )}
+                {!item.imagePath.endsWith(".mp4") ? (
+                  <figcaption className="mt-3 text-xs text-neutral-500">
+                    Open the image to view it full size.
+                  </figcaption>
+                ) : null}
               </figure>
             ) : null}
 

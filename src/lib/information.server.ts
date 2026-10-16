@@ -1,6 +1,6 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { getDb, query } from "@/lib/db.server";
-import { deleteUploadedImage as deleteUploadedImageFile, saveUploadedImage as saveUploadedImageFile } from "@/lib/uploads.server";
+import { deleteUploadedImage as deleteUploadedImageFile, saveUploadedImage as saveUploadedImageFile, saveUploadedVideo as saveUploadedVideoFile } from "@/lib/uploads.server";
 
 export type InformationContent = {
   id: number;
@@ -201,6 +201,13 @@ export async function saveUploadedImage(input: {
   contentType: string;
 }): Promise<{ ok: true; path: string } | { ok: false; error: string }> {
   return saveUploadedImageFile(UPLOAD_SUBDIR, input);
+}
+
+export async function saveUploadedVideo(input: {
+  base64Data: string;
+  contentType: string;
+}): Promise<{ ok: true; path: string } | { ok: false; error: string }> {
+  return saveUploadedVideoFile(UPLOAD_SUBDIR, input);
 }
 
 async function deleteUploadedImage(imagePath: string): Promise<void> {

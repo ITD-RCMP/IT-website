@@ -10,6 +10,11 @@ const ALLOWED_IMAGE_TYPES: Record<string, string> = {
 };
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
+const ALLOWED_VIDEO_TYPES: Record<string, string> = {
+  "video/mp4": ".mp4",
+};
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
+
 export async function saveUploadedImage(
   subdir: string,
   input: { base64Data: string; contentType: string },
@@ -36,6 +41,35 @@ export async function saveUploadedImage(
   } catch (error) {
     console.error("saveUploadedImage failed:", error);
     return { ok: false, error: "Unable to save image." };
+  }
+}
+
+export async function saveUploadedVideo(
+  subdir: string,
+  input: { base64Data: string; contentType: string },
+): Promise<{ ok: true; path: string } | { ok: false; error: string }> {
+  const extension = ALLOWED_VIDEO_TYPES[input.contentType];
+  if (!extension) {
+    return { ok: false, error: "Only MP4 videos are allowed." };
+  }
+
+  const buffer = Buffer.from(input.base64Data, "base64");
+  if (buffer.length === 0) {
+    return { ok: false, error: "Uploaded video is empty." };
+  }
+  if (buffer.length > MAX_VIDEO_BYTES) {
+    return { ok: false, error: "Video must be smaller than 100 MB." };
+  }
+
+  try {
+    const dir = path.join(process.cwd(), "public", "uploads", subdir);
+    await mkdir(dir, { recursive: true });
+    const filename = `${randomUUID()}${extension}`;
+    await writeFile(path.join(dir, filename), buffer);
+    return { ok: true, path: `/uploads/${subdir}/${filename}` };
+  } catch (error) {
+    console.error("saveUploadedVideo failed:", error);
+    return { ok: false, error: "Unable to save video." };
   }
 }
 

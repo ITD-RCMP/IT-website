@@ -122,11 +122,18 @@ export default function Information() {
                 >
                   {item.imagePath ? (
                     <div className="relative h-48 w-full overflow-hidden bg-neutral-100">
-                      <img
-                        src={item.imagePath}
-                        alt={item.title}
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                      />
+                      {item.imagePath.endsWith(".mp4") ? (
+                        <video
+                          src={item.imagePath}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={item.imagePath}
+                          alt={item.title}
+                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        />
+                      )}
                     </div>
                   ) : (
                     <div className="h-48 w-full bg-gradient-to-br from-[#0077C8]/10 to-[#0077C8]/5" />
