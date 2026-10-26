@@ -9,45 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as InformationRouteImport } from './routes/information'
-import { Route as FeedbackRouteImport } from './routes/feedback'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as InformationRouteImport } from './routes/information'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as InformationIdRouteImport } from './routes/information.$id'
-import { Route as AuthMicrosoftRouteImport } from './routes/auth.microsoft'
-import { Route as AdminManageSystemVersionsRouteImport } from './routes/admin.manage-system-versions'
-import { Route as AdminManageInformationRouteImport } from './routes/admin.manage-information'
 import { Route as AdminManageFeedbackRouteImport } from './routes/admin.manage-feedback'
-import { Route as AuthMicrosoftStartRouteImport } from './routes/auth.microsoft.start'
+import { Route as AdminManageInformationRouteImport } from './routes/admin.manage-information'
+import { Route as AdminManageSystemVersionsRouteImport } from './routes/admin.manage-system-versions'
+import { Route as AuthMicrosoftRouteImport } from './routes/auth.microsoft'
+import { Route as InformationIdRouteImport } from './routes/information.$id'
 import { Route as AuthMicrosoftCallbackRouteImport } from './routes/auth.microsoft.callback'
+import { Route as AuthMicrosoftStartRouteImport } from './routes/auth.microsoft.start'
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InformationRoute = InformationRouteImport.update({
-  id: '/information',
-  path: '/information',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FeedbackRoute = FeedbackRouteImport.update({
-  id: '/feedback',
-  path: '/feedback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -55,9 +35,29 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformationRoute = InformationRouteImport.update({
+  id: '/information',
+  path: '/information',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -65,15 +65,15 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const InformationIdRoute = InformationIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => InformationRoute,
+const AdminManageFeedbackRoute = AdminManageFeedbackRouteImport.update({
+  id: '/manage-feedback',
+  path: '/manage-feedback',
+  getParentRoute: () => AdminRoute,
 } as any)
-const AuthMicrosoftRoute = AuthMicrosoftRouteImport.update({
-  id: '/auth/microsoft',
-  path: '/auth/microsoft',
-  getParentRoute: () => rootRouteImport,
+const AdminManageInformationRoute = AdminManageInformationRouteImport.update({
+  id: '/manage-information',
+  path: '/manage-information',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminManageSystemVersionsRoute =
   AdminManageSystemVersionsRouteImport.update({
@@ -81,24 +81,24 @@ const AdminManageSystemVersionsRoute =
     path: '/manage-system-versions',
     getParentRoute: () => AdminRoute,
   } as any)
-const AdminManageInformationRoute = AdminManageInformationRouteImport.update({
-  id: '/manage-information',
-  path: '/manage-information',
-  getParentRoute: () => AdminRoute,
+const AuthMicrosoftRoute = AuthMicrosoftRouteImport.update({
+  id: '/auth/microsoft',
+  path: '/auth/microsoft',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminManageFeedbackRoute = AdminManageFeedbackRouteImport.update({
-  id: '/manage-feedback',
-  path: '/manage-feedback',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AuthMicrosoftStartRoute = AuthMicrosoftStartRouteImport.update({
-  id: '/start',
-  path: '/start',
-  getParentRoute: () => AuthMicrosoftRoute,
+const InformationIdRoute = InformationIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => InformationRoute,
 } as any)
 const AuthMicrosoftCallbackRoute = AuthMicrosoftCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
+  getParentRoute: () => AuthMicrosoftRoute,
+} as any)
+const AuthMicrosoftStartRoute = AuthMicrosoftStartRouteImport.update({
+  id: '/start',
+  path: '/start',
   getParentRoute: () => AuthMicrosoftRoute,
 } as any)
 
@@ -219,39 +219,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/information': {
-      id: '/information'
-      path: '/information'
-      fullPath: '/information'
-      preLoaderRoute: typeof InformationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/feedback': {
-      id: '/feedback'
-      path: '/feedback'
-      fullPath: '/feedback'
-      preLoaderRoute: typeof FeedbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -261,11 +233,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information': {
+      id: '/information'
+      path: '/information'
+      fullPath: '/information'
+      preLoaderRoute: typeof InformationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -275,25 +275,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/information/$id': {
-      id: '/information/$id'
-      path: '/$id'
-      fullPath: '/information/$id'
-      preLoaderRoute: typeof InformationIdRouteImport
-      parentRoute: typeof InformationRoute
-    }
-    '/auth/microsoft': {
-      id: '/auth/microsoft'
-      path: '/auth/microsoft'
-      fullPath: '/auth/microsoft'
-      preLoaderRoute: typeof AuthMicrosoftRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/manage-system-versions': {
-      id: '/admin/manage-system-versions'
-      path: '/manage-system-versions'
-      fullPath: '/admin/manage-system-versions'
-      preLoaderRoute: typeof AdminManageSystemVersionsRouteImport
+    '/admin/manage-feedback': {
+      id: '/admin/manage-feedback'
+      path: '/manage-feedback'
+      fullPath: '/admin/manage-feedback'
+      preLoaderRoute: typeof AdminManageFeedbackRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/manage-information': {
@@ -303,25 +289,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminManageInformationRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/manage-feedback': {
-      id: '/admin/manage-feedback'
-      path: '/manage-feedback'
-      fullPath: '/admin/manage-feedback'
-      preLoaderRoute: typeof AdminManageFeedbackRouteImport
+    '/admin/manage-system-versions': {
+      id: '/admin/manage-system-versions'
+      path: '/manage-system-versions'
+      fullPath: '/admin/manage-system-versions'
+      preLoaderRoute: typeof AdminManageSystemVersionsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/auth/microsoft/start': {
-      id: '/auth/microsoft/start'
-      path: '/start'
-      fullPath: '/auth/microsoft/start'
-      preLoaderRoute: typeof AuthMicrosoftStartRouteImport
-      parentRoute: typeof AuthMicrosoftRoute
+    '/auth/microsoft': {
+      id: '/auth/microsoft'
+      path: '/auth/microsoft'
+      fullPath: '/auth/microsoft'
+      preLoaderRoute: typeof AuthMicrosoftRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/$id': {
+      id: '/information/$id'
+      path: '/$id'
+      fullPath: '/information/$id'
+      preLoaderRoute: typeof InformationIdRouteImport
+      parentRoute: typeof InformationRoute
     }
     '/auth/microsoft/callback': {
       id: '/auth/microsoft/callback'
       path: '/callback'
       fullPath: '/auth/microsoft/callback'
       preLoaderRoute: typeof AuthMicrosoftCallbackRouteImport
+      parentRoute: typeof AuthMicrosoftRoute
+    }
+    '/auth/microsoft/start': {
+      id: '/auth/microsoft/start'
+      path: '/start'
+      fullPath: '/auth/microsoft/start'
+      preLoaderRoute: typeof AuthMicrosoftStartRouteImport
       parentRoute: typeof AuthMicrosoftRoute
     }
   }

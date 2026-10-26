@@ -23,7 +23,7 @@ const statsFilterSchema = z.object({
 });
 
 export const getFeedbackStats = createServerFn({ method: "GET" })
-  .inputValidator(statsFilterSchema)
+  .validator(statsFilterSchema)
   .handler(async ({ data }) => loadFeedbackStats(data));
 
 export const listFeedbackEntries = createServerFn({ method: "GET" }).handler(async () =>
@@ -39,7 +39,7 @@ export const listActiveFeedbackQuestions = createServerFn({ method: "GET" }).han
 );
 
 export const setFeedbackQuestionActive = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       id: z.number().int().positive(),
       isActive: z.boolean(),
@@ -48,11 +48,11 @@ export const setFeedbackQuestionActive = createServerFn({ method: "POST" })
   .handler(async ({ data }) => setFeedbackQuestionActiveRecord(data.id, data.isActive));
 
 export const reorderFeedbackQuestions = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ orderedIds: z.array(z.number().int().positive()).min(1) }))
+  .validator(z.object({ orderedIds: z.array(z.number().int().positive()).min(1) }))
   .handler(async ({ data }) => reorderFeedbackQuestionsRecord(data.orderedIds));
 
 export const createFeedbackQuestion = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       question: z.string().min(1),
       sortOrder: z.number().int().min(1).max(255).optional(),
@@ -61,7 +61,7 @@ export const createFeedbackQuestion = createServerFn({ method: "POST" })
   .handler(async ({ data }) => createFeedbackQuestionRecord(data));
 
 export const updateFeedbackQuestion = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       id: z.number().int().positive(),
       question: z.string().min(1),
@@ -71,11 +71,11 @@ export const updateFeedbackQuestion = createServerFn({ method: "POST" })
   .handler(async ({ data }) => updateFeedbackQuestionRecord(data));
 
 export const deleteFeedbackQuestion = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ id: z.number().int().positive() }))
+  .validator(z.object({ id: z.number().int().positive() }))
   .handler(async ({ data }) => deleteFeedbackQuestionRecord(data.id));
 
 export const submitFeedback = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       category: z.enum(["Academic Staff", "Non-Academic Staff", "Student"]),
       suggestion: z.string().min(1),

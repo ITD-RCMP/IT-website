@@ -43,5 +43,3 @@ export const Route = createFileRoute("/information")({
   },
   component: InformationLayout,
 });
-
-export default InformationLayout;
