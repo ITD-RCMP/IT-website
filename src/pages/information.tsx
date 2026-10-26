@@ -1,5 +1,12 @@
 import React from "react";
 import { Link, useLoaderData } from "@tanstack/react-router";
+import { Check, Link2, Mail, MessageCircle, Share2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { InformationContent } from "@/lib/information-api";
 import type { SystemVersion } from "@/lib/systemVersion-api";
 
@@ -29,6 +36,114 @@ function excerpt(text: string, maxLength: number) {
   return `${text.slice(0, maxLength).trimEnd()}…`;
 }
 
+function ShareMenu({
+  url,
+  title,
+  variant = "overlay",
+}: {
+  url: string;
+  title: string;
+  variant?: "overlay" | "inline";
+}) {
+  const [copied, setCopied] = React.useState(false);
+
+  const absoluteUrl = React.useMemo(() => {
+    if (typeof window === "undefined") return url;
+    try {
+      return new URL(url, window.location.origin).toString();
+    } catch {
+      return url;
+    }
+  }, [url]);
+
+  const encodedUrl = encodeURIComponent(absoluteUrl);
+  const encodedTitle = encodeURIComponent(title);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(absoluteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // ignore
+    }
+  }
+
+  const triggerClassName =
+    variant === "overlay"
+      ? "inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-neutral-700 shadow-sm backdrop-blur transition hover:bg-white hover:text-[#0077C8]"
+      : "inline-flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-600 transition hover:border-[#0077C8] hover:text-[#0077C8]";
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          aria-label="Share"
+          className={triggerClassName}
+        >
+          <Share2 className="h-4 w-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-52"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DropdownMenuItem asChild>
+          <a
+            href={`https://wa.me/?text=${encodedTitle}%20${encodedUrl}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex cursor-pointer items-center gap-2"
+          >
+            <MessageCircle className="h-4 w-4 text-[#25D366]" />
+            WhatsApp
+          </a>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <a
+            href={`https://outlook.office.com/mail/deeplink/compose?subject=${encodedTitle}&body=${encodedUrl}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex cursor-pointer items-center gap-2"
+          >
+            <Mail className="h-4 w-4 text-[#0078D4]" />
+            Outlook
+          </a>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <a
+            href={`mailto:?subject=${encodedTitle}&body=${encodedUrl}`}
+            className="flex cursor-pointer items-center gap-2"
+          >
+            <Mail className="h-4 w-4 text-neutral-500" />
+            Email
+          </a>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault();
+            void handleCopy();
+          }}
+          className="flex cursor-pointer items-center gap-2"
+        >
+          {copied ? (
+            <Check className="h-4 w-4 text-green-600" />
+          ) : (
+            <Link2 className="h-4 w-4 text-neutral-500" />
+          )}
+          {copied ? "Link copied!" : "Copy link"}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export default function Information() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { items, versions } = useLoaderData({ from: "/information" }) as {
@@ -55,7 +170,6 @@ export default function Information() {
 
           <nav className="hidden items-center gap-7 text-sm font-medium text-neutral-700 md:flex">
             <Link to="/information" className="text-neutral-900">Info</Link>
-            <a href="#system-versions" className="hover:text-neutral-900">System versions</a>
             <Link to="/about" className="hover:text-neutral-900">About us</Link>
           </nav>
 
@@ -118,8 +232,15 @@ export default function Information() {
                   key={item.id}
                   to="/information/$id"
                   params={{ id: String(item.id) }}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all hover:border-[#0077C8] hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0077C8]"
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all hover:border-[#0077C8] hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0077C8]"
                 >
+                  <div className="absolute right-3 top-3 z-10">
+                    <ShareMenu
+                      url={`/information/${item.id}`}
+                      title={item.title}
+                    />
+                  </div>
+
                   {item.imagePath ? (
                     <div className="relative h-48 w-full overflow-hidden bg-neutral-100">
                       {item.imagePath.endsWith(".mp4") ? (
@@ -170,7 +291,14 @@ export default function Information() {
               </p>
             ) : (
               <div className="mt-12 grid gap-10 lg:grid-cols-[1.3fr_1fr]">
-                <article className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                <article className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                  <div className="absolute right-3 top-3 z-10">
+                    <ShareMenu
+                      url={`/information#system-versions-${featuredVersion.id}`}
+                      title={`${featuredVersion.systemName} v${featuredVersion.version}`}
+                    />
+                  </div>
+
                   {featuredVersion.imagePath ? (
                     <div className="h-56 w-full overflow-hidden bg-neutral-100 sm:h-64">
                       <img
@@ -271,21 +399,28 @@ export default function Information() {
                               Version {version.version}
                             </p>
                             <p className="text-xs text-neutral-500">{version.systemName}</p>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedVersionId(version.id);
-                                setNotesExpanded(false);
-                              }}
-                              className="mt-1 inline-flex items-center text-sm font-semibold text-[#0077C8] transition hover:text-[#0066AD]"
-                            >
-                              {isSelected ? "Viewing this release" : "Read this update"}
-                              {isSelected ? null : (
-                                <span aria-hidden="true" className="ml-1">
-                                  →
-                                </span>
-                              )}
-                            </button>
+                            <div className="mt-1 flex items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedVersionId(version.id);
+                                  setNotesExpanded(false);
+                                }}
+                                className="inline-flex items-center text-sm font-semibold text-[#0077C8] transition hover:text-[#0066AD]"
+                              >
+                                {isSelected ? "Viewing this release" : "Read this update"}
+                                {isSelected ? null : (
+                                  <span aria-hidden="true" className="ml-1">
+                                    →
+                                  </span>
+                                )}
+                              </button>
+                              <ShareMenu
+                                variant="inline"
+                                url={`/information#system-versions-${version.id}`}
+                                title={`${version.systemName} v${version.version}`}
+                              />
+                            </div>
                           </div>
                         </li>
                       );
