@@ -24,7 +24,7 @@ function mysqlEnvPlugin(): Plugin {
 }
 
 export default defineConfig({
-  cloudflare: false,
+  nitro: false,
   tanstackStart: {
     importProtection: {
       behavior: "error",
