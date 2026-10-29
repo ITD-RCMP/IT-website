@@ -22,6 +22,8 @@ import { Route as AdminManageInformationRouteImport } from './routes/admin.manag
 import { Route as AdminManageSystemVersionsRouteImport } from './routes/admin.manage-system-versions'
 import { Route as AuthMicrosoftRouteImport } from './routes/auth.microsoft'
 import { Route as InformationIdRouteImport } from './routes/information.$id'
+import { Route as MeetingIndexRouteImport } from './routes/meeting.index'
+import { Route as MeetingIdRouteImport } from './routes/meeting.$id'
 import { Route as AuthMicrosoftCallbackRouteImport } from './routes/auth.microsoft.callback'
 import { Route as AuthMicrosoftStartRouteImport } from './routes/auth.microsoft.start'
 
@@ -91,6 +93,16 @@ const InformationIdRoute = InformationIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => InformationRoute,
 } as any)
+const MeetingIndexRoute = MeetingIndexRouteImport.update({
+  id: '/meeting/',
+  path: '/meeting/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeetingIdRoute = MeetingIdRouteImport.update({
+  id: '/meeting/$id',
+  path: '/meeting/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthMicrosoftCallbackRoute = AuthMicrosoftCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
@@ -115,7 +127,9 @@ export interface FileRoutesByFullPath {
   '/admin/manage-system-versions': typeof AdminManageSystemVersionsRoute
   '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
   '/information/$id': typeof InformationIdRoute
+  '/meeting/$id': typeof MeetingIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/meeting/': typeof MeetingIndexRoute
   '/auth/microsoft/callback': typeof AuthMicrosoftCallbackRoute
   '/auth/microsoft/start': typeof AuthMicrosoftStartRoute
 }
@@ -131,7 +145,9 @@ export interface FileRoutesByTo {
   '/admin/manage-system-versions': typeof AdminManageSystemVersionsRoute
   '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
   '/information/$id': typeof InformationIdRoute
+  '/meeting/$id': typeof MeetingIdRoute
   '/admin': typeof AdminIndexRoute
+  '/meeting': typeof MeetingIndexRoute
   '/auth/microsoft/callback': typeof AuthMicrosoftCallbackRoute
   '/auth/microsoft/start': typeof AuthMicrosoftStartRoute
 }
@@ -149,7 +165,9 @@ export interface FileRoutesById {
   '/admin/manage-system-versions': typeof AdminManageSystemVersionsRoute
   '/auth/microsoft': typeof AuthMicrosoftRouteWithChildren
   '/information/$id': typeof InformationIdRoute
+  '/meeting/$id': typeof MeetingIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/meeting/': typeof MeetingIndexRoute
   '/auth/microsoft/callback': typeof AuthMicrosoftCallbackRoute
   '/auth/microsoft/start': typeof AuthMicrosoftStartRoute
 }
@@ -168,7 +186,9 @@ export interface FileRouteTypes {
     | '/admin/manage-system-versions'
     | '/auth/microsoft'
     | '/information/$id'
+    | '/meeting/$id'
     | '/admin/'
+    | '/meeting/'
     | '/auth/microsoft/callback'
     | '/auth/microsoft/start'
   fileRoutesByTo: FileRoutesByTo
@@ -184,7 +204,9 @@ export interface FileRouteTypes {
     | '/admin/manage-system-versions'
     | '/auth/microsoft'
     | '/information/$id'
+    | '/meeting/$id'
     | '/admin'
+    | '/meeting'
     | '/auth/microsoft/callback'
     | '/auth/microsoft/start'
   id:
@@ -201,7 +223,9 @@ export interface FileRouteTypes {
     | '/admin/manage-system-versions'
     | '/auth/microsoft'
     | '/information/$id'
+    | '/meeting/$id'
     | '/admin/'
+    | '/meeting/'
     | '/auth/microsoft/callback'
     | '/auth/microsoft/start'
   fileRoutesById: FileRoutesById
@@ -215,6 +239,8 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AuthMicrosoftRoute: typeof AuthMicrosoftRouteWithChildren
+  MeetingIdRoute: typeof MeetingIdRoute
+  MeetingIndexRoute: typeof MeetingIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -310,6 +336,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InformationIdRouteImport
       parentRoute: typeof InformationRoute
     }
+    '/meeting/': {
+      id: '/meeting/'
+      path: '/meeting'
+      fullPath: '/meeting/'
+      preLoaderRoute: typeof MeetingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meeting/$id': {
+      id: '/meeting/$id'
+      path: '/meeting/$id'
+      fullPath: '/meeting/$id'
+      preLoaderRoute: typeof MeetingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/microsoft/callback': {
       id: '/auth/microsoft/callback'
       path: '/callback'
@@ -378,6 +418,8 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AuthMicrosoftRoute: AuthMicrosoftRouteWithChildren,
+  MeetingIdRoute: MeetingIdRoute,
+  MeetingIndexRoute: MeetingIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

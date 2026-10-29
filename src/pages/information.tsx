@@ -204,7 +204,7 @@ export default function Information() {
       </section>
 
       {/* System versions */}
-      <section id="system-versions" className="mx-auto max-w-6xl scroll-mt-28 px-6 pt-24 md:pt-32">
+      <section id="system-versions" className="mx-auto max-w-6xl scroll-mt-28 px-6 pb-24 pt-24 md:pb-32 md:pt-32">
         <div className="mb-8">
           <SectionLabel>Release notes</SectionLabel>
           <h2 className="mt-2 font-heading text-3xl font-semibold tracking-[-0.03em] text-neutral-950 md:text-4xl">

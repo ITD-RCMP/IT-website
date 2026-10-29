@@ -39,6 +39,7 @@ export default defineConfig({
         path !== "/feedback" &&
         !path.startsWith("/feedback/") &&
         !path.startsWith("/admin") &&
+        !path.startsWith("/meeting") &&
         !path.startsWith("/auth"),
     },
     server: { entry: "server" },

@@ -81,7 +81,7 @@ function Index() {
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 hidden items-end justify-between px-10 pb-8 md:flex lg:px-16">
             <p className="font-heading text-3xl font-medium leading-[1.05] tracking-tight lg:text-4xl">
               <span className="block text-neutral-900">10+ Services</span>
-              <span className="block text-neutral-500">3 Internal Systems</span>
+              <span className="block text-neutral-500">4 Internal Systems</span>
             </p>
             <button
               type="button"
