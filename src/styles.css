@@ -61,6 +61,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: "Schibsted Grotesk", "Segoe UI", "Helvetica Neue", Helvetica, sans-serif;
   --font-heading: "Bricolage Grotesque", "Schibsted Grotesk", sans-serif;
+  --font-display: "Archivo", "Bricolage Grotesque", sans-serif;
 }
 
 :root {
