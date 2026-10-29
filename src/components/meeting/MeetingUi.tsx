@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { Check, type LucideIcon } from "lucide-react";
 
 export function Field({
   label,
@@ -8,6 +9,10 @@ export function Field({
   value,
   onChange,
   autoFocus,
+  icon: Icon,
+  autoComplete = "off",
+  enterKeyHint,
+  children,
 }: {
   label: string;
   name: string;
@@ -15,22 +20,57 @@ export function Field({
   value: string;
   onChange: (value: string) => void;
   autoFocus?: boolean;
+  icon?: LucideIcon;
+  autoComplete?: string;
+  enterKeyHint?: "next" | "done";
+  children?: ReactNode;
 }) {
+  const filled = value.trim().length > 0;
   return (
-    <label className="block">
-      <span className="font-mono text-[13px] text-neutral-500">{label}</span>
-      <input
-        name={name}
-        required
-        maxLength={120}
-        autoFocus={autoFocus}
-        autoComplete="off"
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-2 block w-full rounded-[18px] border border-neutral-200 bg-[#FAFAF8] px-5 py-4 text-[16px] text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-[#2F5BD3] focus:bg-white focus:ring-4 focus:ring-[#2F5BD3]/10"
-      />
-    </label>
+    <div>
+      <label className="block">
+        <span className="font-mono text-[13px] text-neutral-500">{label}</span>
+        <span className="relative mt-2 block">
+          {Icon ? (
+            <Icon
+              className={`pointer-events-none absolute left-5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 transition-colors ${
+                filled ? "text-[#2F5BD3]" : "text-neutral-400"
+              }`}
+              strokeWidth={2}
+            />
+          ) : null}
+          <input
+            name={name}
+            required
+            maxLength={120}
+            autoFocus={autoFocus}
+            autoComplete={autoComplete}
+            autoCapitalize="words"
+            enterKeyHint={enterKeyHint}
+            value={value}
+            placeholder={placeholder}
+            onChange={(e) => onChange(e.target.value)}
+            className={`block w-full rounded-[18px] border border-neutral-200 bg-[#FAFAF8] py-4 pr-12 text-[16px] text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-[#2F5BD3] focus:bg-white focus:ring-4 focus:ring-[#2F5BD3]/10 ${
+              Icon ? "pl-12" : "pl-5"
+            }`}
+          />
+          <AnimatePresence>
+            {filled ? (
+              <motion.span
+                className="pointer-events-none absolute right-4 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-[#2F5BD3] text-white"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 26 }}
+              >
+                <Check className="h-3.5 w-3.5" strokeWidth={3} />
+              </motion.span>
+            ) : null}
+          </AnimatePresence>
+        </span>
+      </label>
+      {children}
+    </div>
   );
 }
 
